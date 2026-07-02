@@ -49,7 +49,7 @@ Deliverables:
 - Stop-loss, drawdown, volatility, and crowding rules.
 - Parameter sensitivity analysis.
 
-Status: in progress. Momentum Top3 + score threshold candidate has completed rolling walk-forward, transaction-cost, rebalance-frequency, and liquidity-threshold validation on real iFinD ETF history.
+Status: in progress. Momentum Top3 + score threshold candidate has completed rolling walk-forward, transaction-cost, rebalance-frequency, and liquidity-threshold validation on real iFinD ETF history. A macro risk overlay branch has been implemented and evaluated, but remains optional because full-sample drawdown was not improved.
 
 ### Phase 4: Paper Trading and Iteration
 
@@ -69,6 +69,6 @@ Next decision point:
 - Keep weekly rebalance as the current primary branch.
 - Consider a 50m 20-day average amount filter as the first execution constraint for paper trading readiness.
 - Add the defensive `m_3_6_trend_top3_min0p6` branch to the same validation harness.
-- Rework macro-resonance as a lower-frequency regime/risk overlay instead of a weekly ranking factor.
+- Keep macro overlay as an optional defensive branch and improve it with market trend/breadth confirmation.
 - Resolve sector valuation/consensus identifiers: exact iFinD sector codes, stock-level aggregation, or temporary postponement.
 - Review real estate and technology sector-index proxies, which currently return sparse series.
