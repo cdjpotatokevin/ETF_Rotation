@@ -37,7 +37,7 @@ Deliverables:
 - Weekly rebalance backtest engine.
 - Baseline strategy report.
 
-Status: baseline completed for momentum, fund-flow, crowding, and weekly Top-N rotation using real iFinD ETF data. Macro EDB data and most sector-index daily series have now been collected. Valuation and prosperity factors remain pending because current sector valuation/consensus queries returned empty tables.
+Status: baseline completed for momentum, fund-flow, crowding, and weekly Top-N rotation using real iFinD ETF data. Macro EDB data and most sector-index daily series have now been collected. A first transparent macro-resonance factor was implemented but failed IC/backtest validation, so it is not promoted to the main strategy. Valuation and prosperity factors remain pending because current sector valuation/consensus queries returned empty tables.
 
 ### Phase 3: Portfolio Optimization and Risk Control
 
@@ -69,6 +69,6 @@ Next decision point:
 - Keep weekly rebalance as the current primary branch.
 - Consider a 50m 20-day average amount filter as the first execution constraint for paper trading readiness.
 - Add the defensive `m_3_6_trend_top3_min0p6` branch to the same validation harness.
-- Implement macro-resonance factors from the newly collected EDB data.
+- Rework macro-resonance as a lower-frequency regime/risk overlay instead of a weekly ranking factor.
 - Resolve sector valuation/consensus identifiers: exact iFinD sector codes, stock-level aggregation, or temporary postponement.
 - Review real estate and technology sector-index proxies, which currently return sparse series.

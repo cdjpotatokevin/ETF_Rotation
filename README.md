@@ -53,6 +53,7 @@ python scripts/tune_momentum_risk.py --train-end 2024-12-31 --test-start 2025-01
 python scripts/validate_momentum_candidate.py
 python scripts/collect_ifind_research_data.py --datasets macro
 python scripts/collect_ifind_research_data.py --datasets sector_index --sector-window-months 3
+python scripts/evaluate_macro_factor.py
 ```
 
 ## Decisions Already Applied
@@ -88,4 +89,4 @@ See `docs/MOMENTUM_CANDIDATE_VALIDATION_RECORD.md` for rolling walk-forward and 
 
 ## Extended Data Status
 
-Macro EDB data and most sector index daily series have been collected through iFinD MCP. Sector valuation and consensus fields are not yet parsed because the current `sector_data` queries returned empty tables; see `docs/MACRO_SECTOR_DATA_RECORD.md` for details and next choices.
+Macro EDB data and most sector index daily series have been collected through iFinD MCP. The first transparent macro-resonance factor was implemented and tested, but it is not promoted to the main strategy because its IC and backtest contribution were weak. Sector valuation and consensus fields are not yet parsed because the current `sector_data` queries returned empty tables; see `docs/MACRO_SECTOR_DATA_RECORD.md` and `docs/MACRO_FACTOR_RECORD.md` for details.

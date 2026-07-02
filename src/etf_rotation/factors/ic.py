@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 
-FACTOR_COLUMNS = ["momentum_score", "fund_flow_score", "crowding_score", "baseline_score"]
+FACTOR_COLUMNS = ["momentum_score", "fund_flow_score", "crowding_score", "macro_resonance_score", "baseline_score"]
 
 
 def calculate_factor_ic(
@@ -20,7 +20,8 @@ def calculate_factor_ic(
     factors["date"] = pd.to_datetime(factors["date"])
     merged = factors.merge(prices[["date", "symbol", "forward_return"]], on=["date", "symbol"], how="inner")
     rows = []
-    available_factors = [factor for factor in FACTOR_COLUMNS if factor in merged.columns]
+    discovered = [column for column in merged.columns if column.endswith("_score") and column not in FACTOR_COLUMNS]
+    available_factors = [factor for factor in FACTOR_COLUMNS + discovered if factor in merged.columns]
     for factor in available_factors:
         ic_by_date = merged.groupby("date").apply(
             lambda x: _spearman_without_scipy(x[factor], x["forward_return"]),
