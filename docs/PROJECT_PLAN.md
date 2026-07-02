@@ -1,0 +1,72 @@
+# ETF Rotation Project Plan
+
+Updated: 2026-07-01
+
+## Confirmed Decisions
+
+- Project path: `/Users/sweethome/Qoder/etf-rotation`
+- Storage: local Parquet files
+- Research period: 2021-01-01 to 2026-06-30
+- ETF pool: default industry plus style universe from the prior plan
+- Execution mode: each phase must include a record document and runnable tests
+
+## Phase Roadmap
+
+### Phase 1: Data Infrastructure
+
+Goal: build a reproducible local data layer.
+
+Deliverables:
+- ETF universe and project configuration.
+- Provider abstraction for synthetic, iFinD MCP CLI, and iFinD HTTP API.
+- Parquet storage utilities.
+- Data quality checks.
+- CLI collection and validation commands.
+- Phase record and tests.
+
+Status: completed with synthetic and iFinD HTTP data. Real ETF historical bars were collected through `cmd_history_quotation`.
+
+### Phase 2: Factor Calculation and Backtesting
+
+Goal: implement and validate the six-factor signal framework.
+
+Deliverables:
+- Momentum, valuation, prosperity, fund-flow, crowding, and macro-resonance factors.
+- Factor normalization and score aggregation.
+- Single-factor IC tests.
+- Weekly rebalance backtest engine.
+- Baseline strategy report.
+
+Status: baseline completed for momentum, fund-flow, crowding, and weekly Top-N rotation using real iFinD ETF data. Valuation, prosperity, and macro-resonance factors remain pending sector, consensus, and macro data integration.
+
+### Phase 3: Portfolio Optimization and Risk Control
+
+Goal: convert scores into implementable portfolios.
+
+Deliverables:
+- Risk parity or inverse-volatility allocation.
+- Position constraints.
+- Stop-loss, drawdown, volatility, and crowding rules.
+- Parameter sensitivity analysis.
+
+Status: in progress. Momentum Top3 + score threshold candidate has completed rolling walk-forward, transaction-cost, rebalance-frequency, and liquidity-threshold validation on real iFinD ETF history.
+
+### Phase 4: Paper Trading and Iteration
+
+Goal: run live signal tracking before real execution.
+
+Deliverables:
+- Daily/weekly signal refresh.
+- Paper portfolio ledger.
+- Drift checks between backtest assumptions and live data.
+- Manual confirmation workflow for early live deployment.
+
+## Current Decision Queue
+
+The benchmark decision is complete: use `510300.SH` (沪深300ETF).
+
+Next decision point:
+- Keep weekly rebalance as the current primary branch.
+- Consider a 50m 20-day average amount filter as the first execution constraint for paper trading readiness.
+- Add the defensive `m_3_6_trend_top3_min0p6` branch to the same validation harness.
+- Add iFinD sector valuation, analyst-consensus, and macro factors next.
