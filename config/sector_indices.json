@@ -1,0 +1,81 @@
+{
+  "sectors": [
+    {
+      "theme": "semiconductor",
+      "name": "中证半导",
+      "index_code": "931865.CSI",
+      "index_query": "中证全指半导体指数",
+      "linked_etfs": ["159995.SZ"]
+    },
+    {
+      "theme": "consumer",
+      "name": "中证主要消费",
+      "index_code": "000932.SH",
+      "index_query": "中证主要消费指数",
+      "linked_etfs": ["159928.SZ", "515710.SH"]
+    },
+    {
+      "theme": "pharmaceutical",
+      "name": "中证医药",
+      "index_code": "000933.SH",
+      "index_query": "中证医药指数",
+      "linked_etfs": ["512010.SH", "159828.SZ"]
+    },
+    {
+      "theme": "financial",
+      "name": "沪深300金融",
+      "index_code": "000914.SH",
+      "index_query": "沪深300金融指数",
+      "linked_etfs": ["510230.SH"]
+    },
+    {
+      "theme": "brokerage",
+      "name": "中证全指证券公司",
+      "index_code": "399975.SZ",
+      "index_query": "中证全指证券公司指数",
+      "linked_etfs": ["512000.SH"]
+    },
+    {
+      "theme": "nonferrous_metals",
+      "name": "中证有色金属",
+      "index_code": "930708.CSI",
+      "index_query": "中证有色金属指数",
+      "linked_etfs": ["512400.SH"]
+    },
+    {
+      "theme": "coal",
+      "name": "中证煤炭",
+      "index_code": "H30596.CSI",
+      "index_query": "中证煤炭指数",
+      "linked_etfs": ["515220.SH"]
+    },
+    {
+      "theme": "defense",
+      "name": "中证军工",
+      "index_code": "399967.SZ",
+      "index_query": "中证军工指数",
+      "linked_etfs": ["512660.SH"]
+    },
+    {
+      "theme": "real_estate",
+      "name": "中证全指房地产",
+      "index_code": "000006.SH",
+      "index_query": "中证全指房地产指数",
+      "linked_etfs": ["159768.SZ"]
+    },
+    {
+      "theme": "infrastructure",
+      "name": "中证基建工程",
+      "index_code": "399995.SZ",
+      "index_query": "中证基建工程指数",
+      "linked_etfs": ["516950.SH"]
+    },
+    {
+      "theme": "technology",
+      "name": "中证科技",
+      "index_code": "931186.CSI",
+      "index_query": "中证科技指数",
+      "linked_etfs": ["515000.SH"]
+    }
+  ]
+}

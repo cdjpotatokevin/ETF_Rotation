@@ -51,6 +51,8 @@ python scripts/extract_mcp_share_data.py --windows 2022-06-22:2022-06-30,2023-06
 python scripts/tune_factor_weights.py --train-end 2024-12-31 --test-start 2025-01-01 --step 0.1
 python scripts/tune_momentum_risk.py --train-end 2024-12-31 --test-start 2025-01-01 --min-scores none,0.60 --target-vols none,0.18 --stop-losses none,0.18 --output-dir data/processed/momentum_risk_tuning_core
 python scripts/validate_momentum_candidate.py
+python scripts/collect_ifind_research_data.py --datasets macro
+python scripts/collect_ifind_research_data.py --datasets sector_index --sector-window-months 3
 ```
 
 ## Decisions Already Applied
@@ -83,3 +85,7 @@ The current primary candidate is `m_1_3_6_top3_min0p6`:
 - A 50m 20-day average amount filter is the first execution constraint to consider, but not yet the research baseline.
 
 See `docs/MOMENTUM_CANDIDATE_VALIDATION_RECORD.md` for rolling walk-forward and transaction-cost sensitivity results on real iFinD ETF history.
+
+## Extended Data Status
+
+Macro EDB data and most sector index daily series have been collected through iFinD MCP. Sector valuation and consensus fields are not yet parsed because the current `sector_data` queries returned empty tables; see `docs/MACRO_SECTOR_DATA_RECORD.md` for details and next choices.
