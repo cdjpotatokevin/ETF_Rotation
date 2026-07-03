@@ -5,7 +5,7 @@ def test_load_project_config():
     cfg = load_project_config()
     assert cfg.project_name == "ETF Rotation"
     assert cfg.data_start.isoformat() == "2021-01-01"
-    assert cfg.data_end.isoformat() == "2026-06-30"
+    assert cfg.data_end.isoformat() == "2026-07-03"
 
 
 def test_load_etf_pool():
