@@ -1,42 +1,42 @@
-# iFinD MCP Data Extraction Record
+# iFinD MCP 数据提取记录
 
-Date: 2026-06-30
+日期：2026-06-30
 
-## Configuration
+## 配置
 
-The provided iFinD MCP configuration was parsed from the attachment and converted into the local CLI format:
+用户提供的 iFinD MCP 配置已从附件解析，并转换为本地 CLI 可用格式：
 
-- Config path: `~/.config/ifind/mcp_config.json`
-- File permission: `600`
-- Servers configured in the pasted config: 7
-- Token content is not stored in project source files.
+- 配置路径：`~/.config/ifind/mcp_config.json`
+- 文件权限：`600`
+- 粘贴配置中包含的服务数量：7
+- token 内容没有写入项目源码。
 
-The bundled iFinD CLI successfully listed the `fund` MCP service tools after network approval.
+获得网络授权后，内置 iFinD CLI 已成功列出 `fund` MCP 服务工具。
 
-## Extracted Data
+## 已提取数据
 
-Official ETF share-flow data was extracted through:
+官方 ETF 份额变化数据通过以下方式提取：
 
-- MCP service: `fund`
-- MCP tool: `get_fund_ownership`
-- Query pattern: exact ETF security code, date window, daily share-flow table
-- Script: `scripts/extract_mcp_share_data.py`
+- MCP 服务：`fund`
+- MCP 工具：`get_fund_ownership`
+- 查询模式：精确 ETF 证券代码、日期窗口、每日份额变化表
+- 脚本：`scripts/extract_mcp_share_data.py`
 
-Command:
+命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/extract_mcp_share_data.py --start 2026-06-22 --end 2026-06-30
 ```
 
-Output:
+输出：
 
-- Parquet: `data/raw/etf_mcp_share_changes_recent.parquet`
-- Raw MCP responses: `data/raw/mcp_share_raw/*.json`
-- Rows: 156
-- Symbols: 19
-- Missing symbols: none
+- Parquet：`data/raw/etf_mcp_share_changes_recent.parquet`
+- 原始 MCP 响应：`data/raw/mcp_share_raw/*.json`
+- 行数：156
+- 标的数量：19
+- 缺失标的：无
 
-Fields:
+字段：
 
 - `symbol`
 - `name`
@@ -45,78 +45,78 @@ Fields:
 - `listed_trading_shares`
 - `source`
 
-Important interpretation:
+重要解释：
 
-- `exchange_share_change` is the useful official daily flow field.
-- `listed_trading_shares` appears to be a static listed-trading-share field in many responses and should not be treated as current ETF total shares without further verification.
+- `exchange_share_change` 是可用的官方每日份额变化字段。
+- `listed_trading_shares` 在很多响应中更像静态上市流通份额字段，在进一步验证前不应直接当作当前 ETF 总份额。
 
-## Coverage Summary
+## 覆盖情况
 
-Most ETFs returned daily rows from 2026-06-22 to 2026-06-30. Two ETFs (`159995.SZ`, `510300.SH`) returned a single dated row for 2026-06-22; the parser now reads that date from the MCP indicator parameter block when the table itself has no date column.
+大部分 ETF 返回了 `2026-06-22` 至 `2026-06-30` 的每日记录。两只 ETF（`159995.SZ`、`510300.SH`）只返回 `2026-06-22` 的单日记录；解析器已能在表格本身没有日期列时，从 MCP 指标参数块读取日期。
 
-## Validation
+## 验证
 
-Commands run:
+运行命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m pytest -q
 ```
 
-Result:
+结果：
 
-- Unit tests: 12 passed
+- 单元测试：12 个通过
 
-Overlap sanity check against HTTP-derived share changes:
+与 HTTP 推导份额变化的重叠样本检查：
 
-- Overlap rows: 130
-- Valid comparison rows: 114
-- Symbols compared: 18
-- Correlation between MCP `exchange_share_change` and HTTP-derived share change: 1.0
+- 重叠行数：130
+- 有效比较行数：114
+- 覆盖标的数：18
+- MCP `exchange_share_change` 与 HTTP 推导份额变化的相关系数：1.0
 
-This confirms that, at least over the overlapping sample, the HTTP-derived `shares_outstanding` changes match the official MCP share-change field exactly. The full-period HTTP-derived fund-flow factor is therefore much more credible than initially assumed, though longer MCP spot checks are still recommended.
+这说明至少在重叠样本内，HTTP 推导的 `shares_outstanding` 变化与 MCP 官方份额变化字段完全一致。因此，全样本 HTTP 推导资金流因子的可信度明显提高，但仍建议继续做更长历史窗口的 MCP 抽样验证。
 
-## Next Step
+## 下一步
 
-Extend the MCP share-flow validation over more historical windows, then either:
+把 MCP 份额变化验证扩展到更多历史窗口，然后二选一：
 
-- extend MCP extraction by rolling date windows, or
-- identify an exact iFinD HTTP/date-sequence indicator for long official ETF share-flow history.
+- 使用滚动日期窗口扩展 MCP 提取。
+- 找到精确的 iFinD HTTP/date-sequence 长历史官方 ETF 份额变化指标。
 
-## Annual June Window Extension
+## 年度六月窗口扩展
 
-The validation was extended to five annual June windows:
+验证扩展到五个年度六月窗口：
 
-- 2022-06-22 to 2022-06-30
-- 2023-06-21 to 2023-06-30
-- 2024-06-21 to 2024-06-28
-- 2025-06-23 to 2025-06-30
-- 2026-06-22 to 2026-06-30
+- `2022-06-22` 至 `2022-06-30`
+- `2023-06-21` 至 `2023-06-30`
+- `2024-06-21` 至 `2024-06-28`
+- `2025-06-23` 至 `2025-06-30`
+- `2026-06-22` 至 `2026-06-30`
 
-Output files:
+输出文件：
 
 - `data/raw/etf_mcp_share_changes_annual_june.parquet`
 - `data/raw/mcp_share_raw_annual_june/*.json`
 - `data/processed/mcp_share_validation/annual_june_overlap_details.parquet`
 - `data/processed/mcp_share_validation/annual_june_summary.json`
 
-Summary:
+汇总：
 
-- MCP rows: 782
-- MCP symbols: 19
-- HTTP/MCP overlap rows: 624
-- Valid comparison rows: 554
-- Valid comparison symbols: 19
-- Overall correlation between MCP official share change and HTTP-derived share change: 0.9994
-- Mean absolute difference: about 0.90 million shares
+- MCP 行数：782
+- MCP 标的数：19
+- HTTP/MCP 重叠行数：624
+- 有效比较行数：554
+- 有效比较标的数：19
+- MCP 官方份额变化与 HTTP 推导份额变化整体相关系数：0.9994
+- 平均绝对差异：约 90 万份
 
-By window:
+分窗口结果：
 
-| Window | Rows | Symbols | Correlation | Max Absolute Difference |
+| 窗口 | 行数 | 标的数 | 相关系数 | 最大绝对差异 |
 |---|---:|---:|---:|---:|
-| 2022-06 | 127 | 19 | 1.0000 | ~0 |
-| 2023-06 | 94 | 19 | 1.0000 | ~0 |
-| 2024-06 | 114 | 19 | 0.9962 | 122.0 million |
-| 2025-06 | 93 | 18 | 1.0000 | ~0 |
-| 2026-06 | 126 | 18 | 1.0000 | ~0 |
+| 2022-06 | 127 | 19 | 1.0000 | 约 0 |
+| 2023-06 | 94 | 19 | 1.0000 | 约 0 |
+| 2024-06 | 114 | 19 | 0.9962 | 1.22 亿份 |
+| 2025-06 | 93 | 18 | 1.0000 | 约 0 |
+| 2026-06 | 126 | 18 | 1.0000 | 约 0 |
 
-The only material discrepancy is concentrated around 2024-06-24 and 2024-06-25, where the MCP "current period share change" and the HTTP-derived daily change appear to have a one-trading-day attribution difference for several ETFs. Outside that local date issue, the two data sources match essentially exactly.
+唯一明显差异集中在 2024-06-24 和 2024-06-25 附近。该处 MCP 的“当期份额变化”和 HTTP 推导的每日变化对部分 ETF 似乎存在一个交易日的归因差异。除这一局部日期问题外，两类数据源基本完全一致。

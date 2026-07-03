@@ -1,132 +1,132 @@
-# Momentum and Risk-Control Tuning Record
+# 动量与风险控制调参记录
 
-Date: 2026-07-01
+日期：2026-07-01
 
-## Objective
+## 目标
 
-Continue from the previous finding that high momentum exposure performed best in the 2025-2026 test period, but improve robustness by testing:
+在上一轮发现高动量暴露在 2025-2026 测试期表现较好的基础上，继续测试稳健性：
 
-- Alternative momentum windows
-- Trend filters
-- Top-N concentration
-- Minimum score thresholds
-- Portfolio-level stop loss
-- Volatility target scaling
+- 不同动量窗口
+- 趋势过滤
+- Top-N 集中度
+- 最低得分门槛
+- 组合层面止损
+- 波动率目标缩放
 
-Benchmark remains `510300.SH` 沪深300ETF.
+基准保持为 `510300.SH` 沪深300ETF。
 
-## Implemented Components
+## 已实现组件
 
-New code:
+新增代码：
 
 - `src/etf_rotation/factors/momentum_variants.py`
 - `src/etf_rotation/backtest/risk_control.py`
 - `scripts/tune_momentum_risk.py`
 - `tests/test_momentum_risk.py`
 
-The backtest engine now also supports:
+回测引擎新增支持：
 
-- `min_score` filtering before ETF selection
-- externally supplied risk-adjusted weights through `run_weighted_backtest`
+- 在 ETF 选择前使用 `min_score` 过滤。
+- 通过 `run_weighted_backtest` 使用外部传入的风险调整后权重。
 
-## Core Grid
+## 核心参数网格
 
-Command:
+命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/tune_momentum_risk.py --train-end 2024-12-31 --test-start 2025-01-01 --min-scores none,0.60 --target-vols none,0.18 --stop-losses none,0.18 --output-dir data/processed/momentum_risk_tuning_core
 ```
 
-Outputs:
+输出：
 
 - `data/processed/momentum_risk_tuning_core/momentum_risk_grid.parquet`
 - `data/processed/momentum_risk_tuning_core/momentum_risk_grid.csv`
 - `data/processed/momentum_risk_tuning_core/best_momentum_risk.json`
 - `data/processed/momentum_risk_tuning_core/best_momentum_risk_curve.parquet`
 
-Grid dimensions:
+网格维度：
 
-- Momentum specs: 6
-- Top N: 3, 5
-- Min score: none, 0.60
-- Target vol: none, 0.18
-- Stop loss: none, 0.18
+- 动量规格：6 组
+- Top N：3、5
+- 最低得分：无、0.60
+- 目标波动：无、0.18
+- 止损阈值：无、0.18
 
-## Best Candidate
+## 最优候选
 
-Best key:
+最优键：
 
 - `m_1_3_6_top3_min0p6_volnone_stopnone`
 
-Configuration:
+配置：
 
-- Momentum spec: 1M/3M/6M weighted momentum with volatility penalty
-- Top N: 3
-- Minimum score: 0.60
-- Target volatility scaling: none
-- Portfolio stop loss: none
+- 动量规格：1M/3M/6M 加权动量，并加入波动惩罚
+- Top N：3
+- 最低得分：0.60
+- 目标波动缩放：无
+- 组合止损：无
 
-Metrics:
+指标：
 
-| Period | Total Return | Annual Return | Sharpe | Max Drawdown | Excess Return | Information Ratio |
+| 区间 | 总收益 | 年化收益 | Sharpe | 最大回撤 | 超额收益 | 信息比率 |
 |---|---:|---:|---:|---:|---:|---:|
-| Train | 17.90% | 4.99% | 0.28 | -14.48% | 41.38% | 0.98 |
-| Test | 70.63% | 45.51% | 2.00 | -14.05% | 42.24% | 1.53 |
-| Full | 94.08% | 14.80% | 0.76 | -17.02% | 98.59% | 1.14 |
+| 训练期 | 17.90% | 4.99% | 0.28 | -14.48% | 41.38% | 0.98 |
+| 测试期 | 70.63% | 45.51% | 2.00 | -14.05% | 42.24% | 1.53 |
+| 全样本 | 94.08% | 14.80% | 0.76 | -17.02% | 98.59% | 1.14 |
 
-## Comparison With Prior Candidate
+## 与上一轮候选对比
 
-Previous best from factor-weight tuning:
+上一轮因子权重调参最优候选：
 
-- Pure momentum, Top 5, no score threshold
-- Full Sharpe: 0.54
-- Full max drawdown: -29.36%
-- Full total return: 84.47%
+- 纯动量、Top 5、无得分门槛
+- 全样本 Sharpe：0.54
+- 全样本最大回撤：-29.36%
+- 全样本总收益：84.47%
 
-New best candidate:
+新最优候选：
 
-- Momentum Top 3 with score threshold 0.60
-- Full Sharpe: 0.76
-- Full max drawdown: -17.02%
-- Full total return: 94.08%
+- 动量 Top 3，得分门槛 0.60
+- 全样本 Sharpe：0.76
+- 全样本最大回撤：-17.02%
+- 全样本总收益：94.08%
 
-Interpretation:
+解读：
 
-- The score threshold is doing the most useful risk-control work by keeping the strategy out of weak relative-strength names.
-- Top 3 concentration improves the signal-to-noise ratio relative to Top 5.
-- Explicit stop-loss did not improve the top result because the selected candidate never breached the tested threshold in a useful way.
-- Volatility targeting reduced drawdown in some variants but also reduced upside and did not win the objective.
+- 得分门槛贡献了最重要的风险控制效果，使策略避免进入相对强度不足的标的。
+- Top 3 集中度相较 Top 5 提高了信号质量。
+- 显式止损没有改善最优结果，因为入选候选没有以有益方式触发测试阈值。
+- 波动率目标缩放在部分变体中降低了回撤，但也削弱了上行收益，未能胜出。
 
-## Strong Alternatives
+## 强备选
 
-| Candidate | Full Sharpe | Full Max DD | Test Sharpe | Notes |
+| 候选 | 全样本 Sharpe | 全样本最大回撤 | 测试期 Sharpe | 备注 |
 |---|---:|---:|---:|---|
-| `m_3_6_trend_top3_min0p6_volnone_stopnone` | 0.78 | -16.08% | 2.03 | Best full Sharpe and lower drawdown, slightly lower objective |
-| `m_3_6_top3_min0p6_volnone_stopnone` | 0.68 | -20.59% | 2.09 | Strong test period, weaker train drawdown |
-| `m_1_3_6_top3_min0p6_vol0p18_stopnone` | 0.77 | -14.35% | 1.94 | Best drawdown control among top candidates |
+| `m_3_6_trend_top3_min0p6_volnone_stopnone` | 0.78 | -16.08% | 2.03 | 全样本 Sharpe 最高且回撤更低，但综合目标略低 |
+| `m_3_6_top3_min0p6_volnone_stopnone` | 0.68 | -20.59% | 2.09 | 测试期强，训练期回撤较弱 |
+| `m_1_3_6_top3_min0p6_vol0p18_stopnone` | 0.77 | -14.35% | 1.94 | 前列候选中回撤控制最好 |
 
-## Recommendation
+## 建议
 
-Promote the following two candidates for deeper research:
+进入深入研究的两条候选：
 
-1. Primary branch: `m_1_3_6_top3_min0p6_volnone_stopnone`
-2. Defensive branch: `m_3_6_trend_top3_min0p6_volnone_stopnone`
+1. 主分支：`m_1_3_6_top3_min0p6_volnone_stopnone`
+2. 防守分支：`m_3_6_trend_top3_min0p6_volnone_stopnone`
 
-Next tests should focus on:
+后续测试重点：
 
-- Rolling walk-forward splits, not just one train/test split. Completed in `docs/MOMENTUM_CANDIDATE_VALIDATION_RECORD.md`.
-- Monthly vs weekly rebalance. Completed in `docs/MOMENTUM_CANDIDATE_VALIDATION_RECORD.md`.
-- Transaction-cost sensitivity. Completed in `docs/MOMENTUM_CANDIDATE_VALIDATION_RECORD.md`.
-- Combining the momentum threshold with macro/valuation filters once those factors are added
+- 滚动样本外切分，而不是只看一次训练/测试切分。已在 `MOMENTUM_CANDIDATE_VALIDATION_RECORD.md` 完成。
+- 月度与周度调仓对比。已在 `MOMENTUM_CANDIDATE_VALIDATION_RECORD.md` 完成。
+- 交易成本敏感性。已在 `MOMENTUM_CANDIDATE_VALIDATION_RECORD.md` 完成。
+- 接入宏观/估值因子后，测试其与动量门槛的组合效果。
 
-## Validation
+## 验证
 
-Commands run:
+运行命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m pytest -q
 ```
 
-Result:
+结果：
 
-- Unit tests: 25 passed after candidate-validation additions
+- 加入候选验证后，单元测试 25 个通过

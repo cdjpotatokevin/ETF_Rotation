@@ -1,50 +1,50 @@
-# Macro Factor Record
+# 宏观因子记录
 
-Date: 2026-07-02
+日期：2026-07-02
 
-## Objective
+## 目标
 
-Use the newly collected iFinD macro EDB data to implement a first transparent version of the macro-resonance factor.
+使用新采集的 iFinD 宏观 EDB 数据，实现第一版透明的宏观共振因子。
 
-The goal was not to optimize the signal, but to test whether a simple rule-based macro mapping has standalone predictive value before adding it to the production candidate.
+本步骤目标不是优化信号，而是在加入主策略前，先检验一个简单规则型宏观映射是否具备独立预测价值。
 
-## Implemented Components
+## 已实现组件
 
-New code:
+新增代码：
 
 - `src/etf_rotation/factors/macro.py`
 - `scripts/evaluate_macro_factor.py`
 - `tests/test_macro_factor.py`
 
-Updated:
+更新：
 
-- `src/etf_rotation/factors/ic.py` now includes `macro_resonance_score` and dynamically detects additional `*_score` columns.
+- `src/etf_rotation/factors/ic.py` 已加入 `macro_resonance_score`，并可动态识别额外的 `*_score` 列。
 
-## Factor Logic
+## 因子逻辑
 
-The first version uses transparent macro components:
+第一版使用透明的宏观组件：
 
-- Growth: PMI, social financing, M2, less 10Y yield pressure
-- Inflation: CPI and PPI
-- Liquidity: M2 and social financing, less 10Y yield pressure
-- Risk-off: weak growth plus yield/inflation pressure
+- 增长：PMI、社融、M2，扣除 10 年国债收益率压力。
+- 通胀：CPI 和 PPI。
+- 流动性：M2 和社融，扣除 10 年国债收益率压力。
+- 避险：弱增长叠加收益率/通胀压力。
 
-Each macro indicator is standardized by rolling z-score. ETF themes then receive fixed exposures to the macro components, for example:
+每个宏观指标使用滚动 z-score 标准化。ETF 主题再按固定暴露映射到宏观组件，例如：
 
-- Growth and technology themes prefer growth plus liquidity.
-- Resource themes prefer inflation.
-- Defensive themes prefer risk-off.
-- Dividend low-vol prefers risk-off and inflation.
+- 成长和科技主题偏好增长与流动性。
+- 资源主题偏好通胀。
+- 防御主题偏好避险。
+- 红利低波偏好避险与通胀。
 
-The score is ranked cross-sectionally each day as `macro_resonance_score`.
+每日横截面排序后的得分记为 `macro_resonance_score`。
 
-## Command
+## 命令
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/evaluate_macro_factor.py
 ```
 
-Outputs:
+输出：
 
 - `data/processed/macro_factor/macro_scores.parquet`
 - `data/processed/macro_factor/macro_factor_ic.parquet`
@@ -52,73 +52,73 @@ Outputs:
 - `data/processed/macro_factor/macro_backtest_weights.parquet`
 - `data/processed/macro_factor/macro_factor_metrics.json`
 
-## Result
+## 结果
 
-Macro blend weights tested:
+测试的宏观混合权重：
 
-| Factor | Weight |
+| 因子 | 权重 |
 |---|---:|
-| Momentum | 45% |
-| Fund flow | 20% |
-| Crowding | 20% |
-| Macro resonance | 15% |
+| 动量 | 45% |
+| 资金流 | 20% |
+| 拥挤度 | 20% |
+| 宏观共振 | 15% |
 
-Backtest result:
+回测结果：
 
-| Metric | Value |
+| 指标 | 数值 |
 |---|---:|
-| Total return | 0.05% |
-| Annual return | 0.01% |
+| 总收益 | 0.05% |
+| 年化收益 | 0.01% |
 | Sharpe | 0.00 |
-| Max drawdown | -40.53% |
-| Benchmark total return | -4.51% |
-| Excess total return | 4.56% |
-| Information ratio | 0.15 |
+| 最大回撤 | -40.53% |
+| 基准总收益 | -4.51% |
+| 超额总收益 | 4.56% |
+| 信息比率 | 0.15 |
 
-IC result:
+IC 结果：
 
-| Factor | Mean IC | IC IR | Positive Ratio |
+| 因子 | 平均 IC | IC IR | 正 IC 占比 |
 |---|---:|---:|---:|
-| Macro resonance | -0.0343 | -0.0909 | 47.01% |
-| Momentum | -0.0113 | -0.0317 | 48.21% |
-| Fund flow | -0.0028 | -0.0101 | 52.17% |
-| Crowding | 0.0367 | 0.1350 | 54.17% |
-| Macro blend baseline | -0.0107 | -0.0334 | 49.37% |
+| 宏观共振 | -0.0343 | -0.0909 | 47.01% |
+| 动量 | -0.0113 | -0.0317 | 48.21% |
+| 资金流 | -0.0028 | -0.0101 | 52.17% |
+| 拥挤度 | 0.0367 | 0.1350 | 54.17% |
+| 宏观混合基线 | -0.0107 | -0.0334 | 49.37% |
 
-## Interpretation
+## 解读
 
-The macro data layer is usable, but this first rule-based macro-resonance mapping is not ready for the main strategy.
+宏观数据层是可用的，但第一版规则型宏观共振映射还不适合进入主策略。
 
-Important findings:
+关键发现：
 
-- The macro factor has negative IC over this ETF pool and sample.
-- Adding it at 15% weight materially worsens the baseline backtest profile.
-- The result likely reflects lag and regime instability: macro data is monthly/low-frequency, while ETF rotation leadership changes faster in A-share sector/style ETFs.
-- A simple static mapping from macro states to themes is too rigid.
+- 宏观因子在当前 ETF 池和样本区间中 IC 为负。
+- 以 15% 权重加入后，明显恶化基线回测表现。
+- 结果可能反映宏观数据的滞后性和市场状态不稳定：宏观数据多为月度/低频，而 A 股行业与风格 ETF 轮动更快。
+- 从宏观状态到 ETF 主题的静态映射过于刚性。
 
-## Recommendation
+## 建议
 
-Do not add this macro factor to the primary candidate yet.
+暂不把该宏观排序因子加入主候选。
 
-Next macro research should test:
+后续宏观研究应测试：
 
-- Lower-frequency use: monthly or quarterly risk overlay instead of weekly ranking factor.
-- Regime filter: only control equity exposure or defensive tilt, not sector ranking.
-- HMM/regime classifier with out-of-sample validation.
-- Contrarian macro interpretation as a diagnostic only, not as an immediate production change.
+- 低频用法：改为月度或季度风险/仓位 overlay，而不是每周横截面排序因子。
+- 状态过滤：只控制权益总仓位或防御倾斜，不直接参与行业排序。
+- 带样本外验证的 HMM/状态分类器。
+- 反向宏观解释只作为诊断，不作为立即上线的生产改动。
 
-The current primary candidate remains `m_1_3_6_top3_min0p6`.
+当前主候选仍为 `m_1_3_6_top3_min0p6`。
 
-## Validation
+## 验证
 
-Commands run:
+运行命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m pytest -q
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/evaluate_macro_factor.py
 ```
 
-Result:
+结果：
 
-- Unit tests: 34 passed
-- Macro factor evaluation completed on real iFinD ETF and macro data.
+- 单元测试：34 个通过
+- 宏观因子评估已基于真实 iFinD ETF 和宏观数据完成

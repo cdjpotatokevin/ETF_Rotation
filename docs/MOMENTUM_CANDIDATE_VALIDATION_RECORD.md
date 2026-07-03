@@ -1,38 +1,38 @@
-# Momentum Candidate Validation Record
+# 动量候选策略验证记录
 
-Date: 2026-07-01
+日期：2026-07-01
 
-## Objective
+## 目标
 
-Validate the fixed candidate selected by the momentum/risk tuning step, without retuning parameters:
+固定动量与风险控制调参阶段选出的候选，不再重新调参，进行独立验证：
 
-- Momentum spec: `m_1_3_6`
-- Selection: Top 3
-- Minimum score: `0.60`
-- Single ETF cap: `25%`
-- Rebalance: weekly Friday
-- Transaction cost: `5bps`
-- Liquidity filter: none in the primary branch; tested separately with 20-day average amount thresholds
-- Benchmark: `510300.SH` 沪深300ETF
+- 动量规格：`m_1_3_6`
+- 选券：Top 3
+- 最低得分：`0.60`
+- 单只 ETF 上限：`25%`
+- 调仓：每周五
+- 交易成本：`5bps`
+- 流动性过滤：主分支不使用；另行测试 20 日平均成交额门槛
+- 基准：`510300.SH` 沪深300ETF
 
-## Implemented Components
+## 已实现组件
 
-New code:
+新增代码：
 
 - `scripts/validate_momentum_candidate.py`
 - `tests/test_momentum_candidate_validation.py`
 
-Backtest engine improvement:
+回测引擎改进：
 
-- `build_weekly_weights` now returns a stable empty schema when no ETF passes the score threshold. This allows high-threshold strategies to naturally stay in cash instead of failing.
+- `build_weekly_weights` 在没有 ETF 通过得分门槛时，会返回稳定的空表结构。这样高门槛策略可以自然保持现金，而不是报错。
 
-## Command
+## 命令
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/validate_momentum_candidate.py
 ```
 
-Outputs:
+输出：
 
 - `data/processed/momentum_candidate_validation/walk_forward.parquet`
 - `data/processed/momentum_candidate_validation/walk_forward.csv`
@@ -44,25 +44,36 @@ Outputs:
 - `data/processed/momentum_candidate_validation/candidate_full_weights.parquet`
 - `data/processed/momentum_candidate_validation/summary.json`
 
-## Full-Sample Result
+## 最新组合
 
-| Metric | Value |
+当前真实 iFinD ETF 数据最新日期为 `2026-06-30`。候选策略最近一次周五调仓日为 `2026-06-26`：
+
+| 资产 | 名称 | 权重 |
+|---|---|---:|
+| `159995.SZ` | 芯片ETF | 25% |
+| `515000.SH` | 科技ETF | 25% |
+| `159915.SZ` | 创业板ETF | 25% |
+| `CASH` | 现金 | 25% |
+
+## 全样本结果
+
+| 指标 | 数值 |
 |---|---:|
-| Total return | 94.08% |
-| Annual return | 14.80% |
-| Annual volatility | 19.44% |
+| 总收益 | 94.08% |
+| 年化收益 | 14.80% |
+| 年化波动 | 19.44% |
 | Sharpe | 0.76 |
-| Max drawdown | -17.02% |
-| Benchmark total return | -4.51% |
-| Excess total return | 98.59% |
-| Information ratio | 1.14 |
-| Average daily turnover | 5.92% |
+| 最大回撤 | -17.02% |
+| 基准总收益 | -4.51% |
+| 超额总收益 | 98.59% |
+| 信息比率 | 1.14 |
+| 平均日换手 | 5.92% |
 
-## Rolling Walk-Forward Result
+## 滚动样本外结果
 
-Parameters are fixed across all rows. Train windows are recorded for context only; each test row is the next period after the train window.
+各行参数均固定不变。训练窗口仅作为背景记录，每一行测试期都是训练期之后的下一段区间。
 
-| Test Period | Test Return | Benchmark Excess | Sharpe | Max Drawdown | Information Ratio |
+| 测试期 | 测试收益 | 相对基准超额 | Sharpe | 最大回撤 | 信息比率 |
 |---|---:|---:|---:|---:|---:|
 | 2022 | -12.77% | 8.31% | -0.76 | -14.48% | 0.68 |
 | 2023 | 0.05% | 11.44% | 0.00 | -11.77% | 1.24 |
@@ -70,16 +81,16 @@ Parameters are fixed across all rows. Train windows are recorded for context onl
 | 2025 | 27.33% | 5.74% | 1.39 | -14.05% | 0.52 |
 | 2026H1 | 30.40% | 26.78% | 2.95 | -13.47% | 2.84 |
 
-Interpretation:
+解读：
 
-- The candidate is not solely a 2025-2026 artifact. It has positive excess return in every annual/half-year walk-forward test window.
-- 2022 remains a weak absolute-return year, but the strategy still lost much less than the benchmark.
-- 2023 was close to flat in absolute terms, while still delivering meaningful benchmark-relative excess.
-- Drawdown stayed in a narrow band around 11.8%-14.5% in all test windows.
+- 候选策略不是单纯依赖 2025-2026 的结果；每个年度/半年度样本外窗口都有正超额。
+- 2022 年绝对收益较弱，但相对基准亏损明显更小。
+- 2023 年绝对收益接近持平，但仍有明显相对超额。
+- 各测试窗口最大回撤大致落在 11.8%-14.5% 区间。
 
-## Transaction-Cost Sensitivity
+## 交易成本敏感性
 
-| Cost | Total Return | Annual Return | Sharpe | Max Drawdown | Excess Return |
+| 成本 | 总收益 | 年化收益 | Sharpe | 最大回撤 | 超额收益 |
 |---:|---:|---:|---:|---:|---:|
 | 0bps | 101.16% | 15.65% | 0.81 | -16.85% | 105.67% |
 | 5bps | 94.08% | 14.80% | 0.76 | -17.02% | 98.59% |
@@ -87,52 +98,52 @@ Interpretation:
 | 20bps | 74.30% | 12.26% | 0.63 | -18.76% | 78.81% |
 | 50bps | 40.53% | 7.34% | 0.38 | -27.67% | 45.04% |
 
-Interpretation:
+解读：
 
-- The strategy is robust to moderate costs. At 20bps it still keeps a 74.30% full-sample total return and 78.81% excess return.
-- At 50bps the edge is materially compressed, so live implementation should avoid high turnover execution and use realistic ETF liquidity constraints.
+- 策略对中等交易成本具备一定稳健性。即使成本为 20bps，全样本总收益仍为 74.30%，超额收益为 78.81%。
+- 成本达到 50bps 时优势明显压缩，实盘应避免高换手执行，并加入真实 ETF 流动性约束。
 
-## Rebalance and Liquidity Sensitivity
+## 调仓频率与流动性敏感性
 
-Liquidity filter uses 20-day average amount. The primary branch is weekly Friday rebalance with no liquidity filter.
+流动性过滤使用 20 日平均成交额。主分支为每周五调仓且不加流动性过滤。
 
-| Rebalance | Min Avg Amount | Total Return | Sharpe | Max Drawdown | Excess Return | Avg Turnover |
+| 调仓 | 最低平均成交额 | 总收益 | Sharpe | 最大回撤 | 超额收益 | 平均换手 |
 |---|---:|---:|---:|---:|---:|---:|
-| Weekly | None | 94.08% | 0.76 | -17.02% | 98.59% | 5.92% |
-| Weekly | 50m | 82.92% | 0.65 | -18.98% | 87.43% | 6.17% |
-| Weekly | 100m | 67.97% | 0.56 | -26.06% | 72.48% | 5.80% |
-| Weekly | 200m | 55.45% | 0.48 | -28.55% | 59.95% | 5.59% |
-| Monthly | None | 40.85% | 0.36 | -21.36% | 45.36% | 3.24% |
-| Monthly | 50m | 17.15% | 0.16 | -35.52% | 21.66% | 2.99% |
-| Monthly | 100m | 4.62% | 0.04 | -40.97% | 9.13% | 3.03% |
-| Monthly | 200m | 76.59% | 0.43 | -36.25% | 81.10% | 2.70% |
+| 每周 | 无 | 94.08% | 0.76 | -17.02% | 98.59% | 5.92% |
+| 每周 | 5000万 | 82.92% | 0.65 | -18.98% | 87.43% | 6.17% |
+| 每周 | 1亿 | 67.97% | 0.56 | -26.06% | 72.48% | 5.80% |
+| 每周 | 2亿 | 55.45% | 0.48 | -28.55% | 59.95% | 5.59% |
+| 每月 | 无 | 40.85% | 0.36 | -21.36% | 45.36% | 3.24% |
+| 每月 | 5000万 | 17.15% | 0.16 | -35.52% | 21.66% | 2.99% |
+| 每月 | 1亿 | 4.62% | 0.04 | -40.97% | 9.13% | 3.03% |
+| 每月 | 2亿 | 76.59% | 0.43 | -36.25% | 81.10% | 2.70% |
 
-Interpretation:
+解读：
 
-- Weekly rebalance remains the primary branch. Monthly rebalance reduces turnover, but the performance sacrifice is too large under the current momentum signal.
-- A 50m 20-day average amount filter is still usable if execution discipline is prioritized.
-- 100m and 200m weekly filters materially reduce the strategy's edge in this 19-ETF pool.
-- Monthly plus high liquidity threshold is unstable: the 200m row recovers total return but with much worse drawdown and lower risk-adjusted performance.
+- 当前仍建议以每周调仓作为主分支。月度调仓能降低换手，但在当前动量信号下绩效牺牲过大。
+- 如果优先考虑执行纪律，可以把 20 日平均成交额 5000 万作为第一层约束候选。
+- 1 亿和 2 亿的周度过滤在当前 19 只 ETF 池中会明显削弱策略优势。
+- 月度叠加高流动性门槛不稳定：2 亿门槛行总收益恢复，但回撤更差、风险调整收益更低。
 
-## Recommendation
+## 建议
 
-Keep `m_1_3_6_top3_min0p6` as the primary research branch. The next practical validation steps are:
+保留 `m_1_3_6_top3_min0p6` 作为主研究分支。下一步实用验证包括：
 
-- Keep weekly rebalance for now.
-- Consider a 50m 20-day average amount filter as the first live-execution constraint, but do not make it the research baseline yet.
-- Build the defensive branch `m_3_6_trend_top3_min0p6` into the same validation script for side-by-side monitoring.
-- Add valuation, prosperity, and macro filters only after their iFinD data sources are wired cleanly.
+- 继续使用每周调仓。
+- 将 20 日平均成交额 5000 万作为第一层实盘执行约束候选，但暂不作为研究基线。
+- 将防守分支 `m_3_6_trend_top3_min0p6` 纳入同一验证脚本并行监控。
+- 估值、景气和宏观过滤器要等 iFinD 数据源稳定接入后再加入。
 
-## Validation
+## 验证
 
-Commands run:
+运行命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m pytest -q
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/validate_momentum_candidate.py
 ```
 
-Result:
+结果：
 
-- Unit tests: 25 passed
-- Candidate validation completed on real iFinD ETF historical data.
+- 单元测试：25 个通过
+- 候选验证已基于真实 iFinD ETF 历史数据完成

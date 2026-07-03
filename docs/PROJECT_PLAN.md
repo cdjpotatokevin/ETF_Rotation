@@ -1,74 +1,96 @@
-# ETF Rotation Project Plan
+# ETF 轮动项目规划
 
-Updated: 2026-07-01
+更新日期：2026-07-03
 
-## Confirmed Decisions
+## 已确认决策
 
-- Project path: `/Users/sweethome/Qoder/etf-rotation`
-- Storage: local Parquet files
-- Research period: 2021-01-01 to 2026-06-30
-- ETF pool: default industry plus style universe from the prior plan
-- Execution mode: each phase must include a record document and runnable tests
+- 项目路径：`/Users/sweethome/Qoder/etf-rotation`
+- 存储方式：本地 Parquet 文件
+- 研究区间：`2021-01-01` 至 `2026-06-30`
+- ETF 池：原方案中的行业 ETF 与风格 ETF 池
+- 基准：`510300.SH` 沪深300ETF
+- 执行要求：每个阶段都要保留记录文档和可运行测试
 
-## Phase Roadmap
+## 阶段路线
 
-### Phase 1: Data Infrastructure
+### 第一阶段：数据基础设施
 
-Goal: build a reproducible local data layer.
+目标：建立可复现的本地数据层。
 
-Deliverables:
-- ETF universe and project configuration.
-- Provider abstraction for synthetic, iFinD MCP CLI, and iFinD HTTP API.
-- Parquet storage utilities.
-- Data quality checks.
-- CLI collection and validation commands.
-- Phase record and tests.
+交付内容：
 
-Status: completed with synthetic and iFinD HTTP data. Real ETF historical bars were collected through `cmd_history_quotation`.
+- ETF 池与项目配置。
+- 合成数据、iFinD MCP CLI、iFinD HTTP API 的数据源抽象。
+- Parquet 存储工具。
+- ETF 日线数据质量检查。
+- 数据采集与校验 CLI 命令。
+- 阶段记录与测试。
 
-### Phase 2: Factor Calculation and Backtesting
+状态：已完成。项目已接入合成数据和 iFinD HTTP 数据，并通过 `cmd_history_quotation` 采集真实 ETF 历史行情。
 
-Goal: implement and validate the six-factor signal framework.
+### 第二阶段：因子计算与回测
 
-Deliverables:
-- Momentum, valuation, prosperity, fund-flow, crowding, and macro-resonance factors.
-- Factor normalization and score aggregation.
-- Single-factor IC tests.
-- Weekly rebalance backtest engine.
-- Baseline strategy report.
+目标：实现并验证 ETF 轮动信号框架。
 
-Status: baseline completed for momentum, fund-flow, crowding, and weekly Top-N rotation using real iFinD ETF data. Macro EDB data and most sector-index daily series have now been collected. A first transparent macro-resonance factor was implemented but failed IC/backtest validation, so it is not promoted to the main strategy. Valuation and prosperity factors remain pending because current sector valuation/consensus queries returned empty tables.
+交付内容：
 
-### Phase 3: Portfolio Optimization and Risk Control
+- 动量、估值、景气、资金流、拥挤度、宏观共振因子。
+- 因子标准化与综合打分。
+- 单因子 IC 测试。
+- 每周调仓回测引擎。
+- 基线策略报告。
 
-Goal: convert scores into implementable portfolios.
+状态：已完成可运行基线。当前真实数据版本已实现动量、资金流、拥挤度和每周 Top-N 轮动。宏观 EDB 数据和大部分行业指数日线已采集；第一版宏观共振排序因子验证失败，不纳入主策略。估值和景气因子仍待推进，因为当前行业估值/一致预期查询返回空表。
 
-Deliverables:
-- Risk parity or inverse-volatility allocation.
-- Position constraints.
-- Stop-loss, drawdown, volatility, and crowding rules.
-- Parameter sensitivity analysis.
+### 第三阶段：组合优化与风险控制
 
-Status: in progress. Momentum Top3 + score threshold candidate has completed rolling walk-forward, transaction-cost, rebalance-frequency, and liquidity-threshold validation on real iFinD ETF history. A macro risk overlay branch has been implemented and evaluated, but remains optional because full-sample drawdown was not improved.
+目标：把信号转化为更可执行的组合。
 
-### Phase 4: Paper Trading and Iteration
+交付内容：
 
-Goal: run live signal tracking before real execution.
+- 风险平价或逆波动加权。
+- 持仓约束。
+- 止损、回撤、波动率和拥挤度控制。
+- 参数敏感性分析。
 
-Deliverables:
-- Daily/weekly signal refresh.
-- Paper portfolio ledger.
-- Drift checks between backtest assumptions and live data.
-- Manual confirmation workflow for early live deployment.
+状态：进行中。动量 Top3 + 得分门槛候选已完成滚动样本外、交易成本、调仓频率和流动性门槛验证。宏观风险 overlay 已实现并评估，但因全样本最大回撤没有改善，暂作为可选防守分支。
 
-## Current Decision Queue
+### 第四阶段：模拟跟踪与迭代
 
-The benchmark decision is complete: use `510300.SH` (沪深300ETF).
+目标：实盘前先运行信号跟踪和模拟组合。
 
-Next decision point:
-- Keep weekly rebalance as the current primary branch.
-- Consider a 50m 20-day average amount filter as the first execution constraint for paper trading readiness.
-- Add the defensive `m_3_6_trend_top3_min0p6` branch to the same validation harness.
-- Keep macro overlay as an optional defensive branch and improve it with market trend/breadth confirmation.
-- Resolve sector valuation/consensus identifiers: exact iFinD sector codes, stock-level aggregation, or temporary postponement.
-- Review real estate and technology sector-index proxies, which currently return sparse series.
+交付内容：
+
+- 每日/每周信号刷新。
+- 模拟组合台账。
+- 回测假设与实时数据的偏差检查。
+- 早期实盘前的人工确认流程。
+
+## 当前主策略与最新信号
+
+当前主策略：`m_1_3_6_top3_min0p6`。
+
+- 每周五调仓。
+- 选择动量得分最高且分数不低于 `0.60` 的 3 只 ETF。
+- 单只 ETF 上限 `25%`，剩余资金留在现金。
+- 基准为 `510300.SH` 沪深300ETF。
+
+最新数据日期：`2026-06-30`。最近一次组合调仓日：`2026-06-26`。
+
+| 资产 | 名称 | 权重 |
+|---|---|---:|
+| `159995.SZ` | 芯片ETF | 25% |
+| `515000.SH` | 科技ETF | 25% |
+| `159915.SZ` | 创业板ETF | 25% |
+| `CASH` | 现金 | 25% |
+
+最新宏观 overlay 信号日期：`2026-06-30`。宏观风险分数为 `0.2596`，目标仓位为 `100%`，当前不触发额外降仓。
+
+## 下一步决策队列
+
+- 继续以每周调仓作为当前主分支。
+- 把 20 日平均成交额 `5000万` 作为模拟跟踪前的第一层执行约束候选。
+- 将防守分支 `m_3_6_trend_top3_min0p6` 接入同一套验证框架并行观察。
+- 保留宏观 overlay 为可选防守分支，并加入市场趋势/市场宽度确认，减少误降仓。
+- 解决行业估值/一致预期字段的标识符问题：使用精确 iFinD 行业代码、成分股聚合，或阶段性推迟。
+- 复核地产和科技行业指数代理；当前返回序列较稀疏。

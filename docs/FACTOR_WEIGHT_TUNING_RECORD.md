@@ -1,70 +1,70 @@
-# Factor Weight Tuning Record
+# 因子权重调参记录
 
-Date: 2026-07-01
+日期：2026-07-01
 
-## Objective
+## 目标
 
-Retune the three currently available baseline factors using real iFinD ETF data:
+使用真实 iFinD ETF 数据，重新评估当前可用的三个基线因子：
 
-- Momentum
-- Fund flow
-- Crowding
+- 动量
+- 资金流
+- 拥挤度
 
-The benchmark remains `510300.SH` 沪深300ETF.
+基准保持为 `510300.SH` 沪深300ETF。
 
-## Method
+## 方法
 
-Script:
+脚本：
 
 - `scripts/tune_factor_weights.py`
 
-Command:
+命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/tune_factor_weights.py --train-end 2024-12-31 --test-start 2025-01-01 --step 0.1
 ```
 
-Grid:
+参数网格：
 
-- Weight step: 0.1
-- All non-negative combinations where momentum + fund flow + crowding = 1.0
-- 66 combinations
+- 权重步长：0.1
+- 动量、资金流、拥挤度三项权重均非负，且总和等于 1.0
+- 共 66 组组合
 
-Split:
+样本切分：
 
-- Train: data through 2024-12-31
-- Test: data from 2025-01-01 onward
+- 训练期：截至 `2024-12-31`
+- 测试期：自 `2025-01-01` 起
 
-Outputs:
+输出：
 
 - `data/processed/weight_tuning/factor_weight_grid.parquet`
 - `data/processed/weight_tuning/factor_weight_grid.csv`
 - `data/processed/weight_tuning/best_weights.json`
 - `data/processed/weight_tuning/best_weight_backtest_curve.parquet`
 
-## Best Candidate
+## 最优候选
 
-Best key:
+最优键：
 
 - `m1.0_f0.0_c0.0`
 
-Weights:
+权重：
 
-- Momentum: 1.0
-- Fund flow: 0.0
-- Crowding: 0.0
+- 动量：1.0
+- 资金流：0.0
+- 拥挤度：0.0
 
-Metrics:
+指标：
 
-| Period | Total Return | Annual Return | Sharpe | Max Drawdown | Excess Return | Information Ratio |
+| 区间 | 总收益 | 年化收益 | Sharpe | 最大回撤 | 超额收益 | 信息比率 |
 |---|---:|---:|---:|---:|---:|---:|
-| Train | 3.25% | 0.95% | 0.04 | -29.36% | 26.73% | 0.80 |
-| Test | 86.89% | 55.11% | 1.96 | -15.68% | 58.50% | 1.62 |
-| Full | 84.47% | 13.59% | 0.54 | -29.36% | 88.98% | 1.07 |
+| 训练期 | 3.25% | 0.95% | 0.04 | -29.36% | 26.73% | 0.80 |
+| 测试期 | 86.89% | 55.11% | 1.96 | -15.68% | 58.50% | 1.62 |
+| 全样本 | 84.47% | 13.59% | 0.54 | -29.36% | 88.98% | 1.07 |
 
-## Top Candidates
+## 排名前列候选
 
-| Rank | Weights (M/F/C) | Train Sharpe | Test Sharpe | Full Sharpe | Test Excess | Full Excess | Full Max DD |
+| 排名 | 权重（动量/资金流/拥挤度） | 训练期 Sharpe | 测试期 Sharpe | 全样本 Sharpe | 测试期超额 | 全样本超额 | 全样本最大回撤 |
 |---:|---|---:|---:|---:|---:|---:|---:|
 | 1 | 1.0 / 0.0 / 0.0 | 0.04 | 1.96 | 0.54 | 58.50% | 88.98% | -29.36% |
 | 2 | 0.8 / 0.1 / 0.1 | 0.06 | 1.90 | 0.54 | 53.75% | 87.17% | -30.08% |
@@ -72,18 +72,18 @@ Metrics:
 | 4 | 0.9 / 0.0 / 0.1 | 0.04 | 1.82 | 0.50 | 50.53% | 81.70% | -32.84% |
 | 5 | 0.8 / 0.2 / 0.0 | -0.13 | 1.86 | 0.38 | 52.80% | 59.79% | -37.43% |
 
-## Interpretation
+## 解读
 
-The grid search strongly favors high momentum weights, mainly because momentum performed very well in the 2025-2026 test period.
+网格搜索明显偏向高动量权重，主要因为动量在 2025-2026 测试期表现很强。
 
-However, this should not be treated as final proof that a pure momentum strategy is structurally best:
+但这不应被视为“纯动量结构性最优”的最终证据：
 
-- Train-period Sharpe is only 0.04 for the best candidate.
-- The previously computed 21-day cross-sectional IC for momentum is slightly negative.
-- The result may reflect a 2025-2026 market regime where growth and technology trends dominated.
+- 最优候选在训练期 Sharpe 只有 0.04。
+- 此前计算的 21 日横截面 IC 中，动量略为负值。
+- 结果可能反映的是 2025-2026 年成长和科技趋势占优的市场环境。
 
-Working recommendation:
+阶段性建议：
 
-- Use a momentum-heavy candidate as the next research branch.
-- Do not remove crowding yet; test regime-dependent weights and drawdown control first.
-- Re-run tuning after adding valuation, analyst-consensus prosperity, and macro-resonance factors.
+- 将动量偏重策略作为下一条研究分支。
+- 暂不删除拥挤度因子，先测试分环境权重和回撤控制。
+- 接入估值、景气和宏观因子后，重新运行权重调参。

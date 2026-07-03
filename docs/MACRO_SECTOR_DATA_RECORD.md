@@ -1,20 +1,20 @@
-# Macro and Sector Data Record
+# 宏观与行业数据记录
 
-Date: 2026-07-02
+日期：2026-07-02
 
-## Objective
+## 目标
 
-Continue the original ETF rotation plan by filling the data gaps needed for valuation, prosperity, and macro-resonance factors.
+继续推进原 ETF 轮动方案，补齐估值、景气和宏观共振因子所需的数据缺口。
 
-This step focuses on:
+本步骤重点包括：
 
-- Macro indicators from iFinD EDB
-- Sector/index daily market data
-- Sector valuation and consensus/prosperity data probe
+- iFinD EDB 宏观指标
+- 行业/指数日线行情
+- 行业估值与一致预期/景气数据探测
 
-## Implemented Components
+## 已实现组件
 
-New code and configuration:
+新增代码和配置：
 
 - `src/etf_rotation/data/ifind_mcp.py`
 - `scripts/collect_ifind_research_data.py`
@@ -22,127 +22,127 @@ New code and configuration:
 - `config/sector_indices.json`
 - `tests/test_ifind_mcp_parser.py`
 
-The collector supports:
+采集器支持：
 
-- iFinD MCP raw response archival
-- Standard EDB table parsing
-- Markdown table parsing
-- Chinese numeric units such as `万`, `亿`, `万亿`
-- 3-month sector-index windows to avoid MCP long-range truncation
-- Raw-response reuse for resumable collection
+- iFinD MCP 原始响应归档
+- 标准 EDB 表格解析
+- Markdown 表格解析
+- `万`、`亿`、`万亿` 等中文数字单位解析
+- 使用 3 个月行业指数窗口，减少 MCP 长区间截断
+- 复用原始响应，支持中断后继续采集
 
-## Macro EDB Data
+## 宏观 EDB 数据
 
-Command:
+命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/collect_ifind_research_data.py --datasets macro
 ```
 
-Output:
+输出：
 
 - `data/raw/macro_indicators.parquet`
-- Raw responses under `data/raw/ifind_research_raw/macro/`
+- 原始响应目录：`data/raw/ifind_research_raw/macro/`
 
-Coverage:
+覆盖情况：
 
-| Indicator | Rows | Start | End | Notes |
+| 指标 | 行数 | 起始 | 结束 | 备注 |
 |---|---:|---|---|---|
-| Manufacturing PMI | 66 | 2021-01-31 | 2026-06-30 | Monthly |
-| CPI YoY | 65 | 2021-01-31 | 2026-05-31 | Monthly |
-| PPI YoY | 65 | 2021-01-31 | 2026-05-31 | Monthly |
-| M2 YoY | 65 | 2021-01-31 | 2026-05-31 | Monthly |
-| Social financing stock YoY | 65 | 2021-01-31 | 2026-05-31 | Monthly |
-| China 10Y government bond yield | 1369 | 2021-01-04 | 2026-06-30 | Daily |
+| 制造业 PMI | 66 | 2021-01-31 | 2026-06-30 | 月度 |
+| CPI 同比 | 65 | 2021-01-31 | 2026-05-31 | 月度 |
+| PPI 同比 | 65 | 2021-01-31 | 2026-05-31 | 月度 |
+| M2 同比 | 65 | 2021-01-31 | 2026-05-31 | 月度 |
+| 社融存量同比 | 65 | 2021-01-31 | 2026-05-31 | 月度 |
+| 中国 10 年期国债收益率 | 1369 | 2021-01-04 | 2026-06-30 | 日度 |
 
-Result:
+结果：
 
-- Macro data is usable for the macro-resonance factor and future HMM/regime classifier work.
+- 宏观数据可用于宏观共振因子，以及后续 HMM/市场状态分类器研究。
 
-## Sector Index Data
+## 行业指数数据
 
-Command:
+命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/collect_ifind_research_data.py --datasets sector_index --sector-window-months 3
 ```
 
-Output:
+输出：
 
 - `data/raw/sector_index_daily.parquet`
-- Raw responses under `data/raw/ifind_research_raw/sector_index/`
+- 原始响应目录：`data/raw/ifind_research_raw/sector_index/`
 
-Coverage:
+覆盖情况：
 
-| Theme | Index Code | Rows | Start | End | Limitation |
+| 主题 | 指数代码 | 行数 | 起始 | 结束 | 限制 |
 |---|---|---:|---|---|---|
-| brokerage | `399975.SZ` | 1328 | 2021-01-04 | 2026-06-30 | Complete |
-| consumer | `000932.SH` | 1328 | 2021-01-04 | 2026-06-30 | 60 close values missing |
-| defense | `399967.SZ` | 1328 | 2021-01-04 | 2026-06-30 | Complete |
-| financial | `000914.SH` | 1328 | 2021-01-04 | 2026-06-30 | Complete |
-| infrastructure | `399995.SZ` | 1328 | 2021-01-04 | 2026-06-30 | Complete |
-| nonferrous metals | `930708.CSI` | 1328 | 2021-01-04 | 2026-06-30 | Complete |
-| pharmaceutical | `000933.SH` | 1328 | 2021-01-04 | 2026-06-30 | Uses CSI 800 health care proxy |
-| semiconductor | `931865.CSI` | 1235 | 2021-01-04 | 2026-06-30 | Starts with fewer early records |
-| coal | `H30596.CSI` | 1328 | 2021-01-04 | 2026-06-30 | Amount missing |
-| real estate | `000006.SH` | 120 | 2021-01-29 | 2026-06-30 | Monthly/sparse only |
-| technology | `931186.CSI` | 180 | 2021-01-29 | 2026-06-30 | Monthly/sparse only |
+| 券商 | `399975.SZ` | 1328 | 2021-01-04 | 2026-06-30 | 完整 |
+| 消费 | `000932.SH` | 1328 | 2021-01-04 | 2026-06-30 | 60 个收盘价缺失 |
+| 军工 | `399967.SZ` | 1328 | 2021-01-04 | 2026-06-30 | 完整 |
+| 金融 | `000914.SH` | 1328 | 2021-01-04 | 2026-06-30 | 完整 |
+| 基建 | `399995.SZ` | 1328 | 2021-01-04 | 2026-06-30 | 完整 |
+| 有色金属 | `930708.CSI` | 1328 | 2021-01-04 | 2026-06-30 | 完整 |
+| 医药 | `000933.SH` | 1328 | 2021-01-04 | 2026-06-30 | 使用中证800医药代理 |
+| 半导体 | `931865.CSI` | 1235 | 2021-01-04 | 2026-06-30 | 早期记录较少 |
+| 煤炭 | `H30596.CSI` | 1328 | 2021-01-04 | 2026-06-30 | 成交额缺失 |
+| 地产 | `000006.SH` | 120 | 2021-01-29 | 2026-06-30 | 仅月度/稀疏 |
+| 科技 | `931186.CSI` | 180 | 2021-01-29 | 2026-06-30 | 仅月度/稀疏 |
 
-Result:
+结果：
 
-- Most sector index close-price series are usable.
-- Real estate and technology index mappings need a better daily index code or should temporarily fall back to ETF daily prices.
-- Coal can be used for price momentum but not amount-based crowding from the sector-index source.
+- 大多数行业指数收盘价序列可用。
+- 地产和科技指数映射需要更好的日度指数代码，或暂时回退到 ETF 自身日线价格。
+- 煤炭可用于价格动量，但无法从当前行业指数源计算成交额类拥挤度。
 
-## Sector Valuation and Consensus Probe
+## 行业估值与一致预期探测
 
-Command:
+命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/collect_ifind_research_data.py --datasets sector_fundamental
 ```
 
-Output:
+输出：
 
 - `data/raw/sector_fundamentals.parquet`
-- Raw responses under `data/raw/ifind_research_raw/sector_fundamental/`
+- 原始响应目录：`data/raw/ifind_research_raw/sector_fundamental/`
 
-Result:
+结果：
 
-- Parsed rows: 0
-- The MCP `sector_data` tool recognizes requested fields such as PE, PB, ROE, forecast net profit, and forecast EPS, but returned empty tables for the current sector/index queries.
+- 解析行数：0
+- MCP `sector_data` 工具能识别 PE、PB、ROE、预测净利润、预测 EPS 等请求字段，但当前行业/指数查询返回空表。
 
-Current interpretation:
+当前判断：
 
-- This is likely a sector-identifier issue rather than proof that the data is unavailable.
-- The next attempt should use exact iFinD板块代码 if available, or derive sector valuation/prosperity from index constituents or representative ETF holdings.
+- 这更可能是行业标识符问题，而不是数据一定不可用。
+- 下一次应尝试使用精确 iFinD 板块代码，或从指数成分股/代表 ETF 持仓聚合行业估值和景气数据。
 
-## Data Issues Requiring Decision
+## 需要决策的数据问题
 
-1. **iFinD HTTP refresh token is not configured in the current shell**
+1. 当前 shell 没有配置 iFinD HTTP refresh token
 
-   HTTP `cmd_history_quotation` could be a faster and more exact channel for index daily data, but the current environment has no `IFIND_REFRESH_TOKEN`.
+   HTTP `cmd_history_quotation` 可能是更快、更精确的指数日线采集通道，但当前环境没有 `IFIND_REFRESH_TOKEN`。
 
-2. **Sector valuation/consensus needs an exact identifier strategy**
+2. 行业估值/一致预期需要确定标识符策略
 
-   Options:
+   可选方案：
 
-   - Ask iFinD/terminal for exact sector codes for the target industries.
-   - Use ETF holdings/constituents and aggregate stock-level PE/PB/ROE/consensus.
-   - Temporarily postpone valuation/prosperity and proceed with macro-resonance first.
+   - 向 iFinD/终端查询目标行业的精确板块代码。
+   - 使用 ETF 持仓/指数成分股，聚合股票层面的 PE、PB、ROE 和一致预期。
+   - 暂时推迟估值/景气因子，先推进宏观共振研究。
 
-3. **Real estate and technology sector proxies need review**
+3. 地产和科技行业代理需要复核
 
-   The current exact codes return sparse series. These two themes should use either better index codes or ETF daily price series until the sector-index mapping is improved.
+   当前精确代码返回稀疏序列。这两个主题应使用更好的指数代码，或在行业指数映射改善前先使用 ETF 日线价格。
 
-## Validation
+## 验证
 
-Commands run:
+运行命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m pytest -q
 ```
 
-Result:
+结果：
 
-- Unit tests: 31 passed
+- 单元测试：31 个通过

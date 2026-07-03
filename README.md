@@ -1,19 +1,32 @@
-# ETF Rotation
+# ETF 轮动
 
-Industry and style ETF rotation research system for A-share ETFs.
+A 股行业与风格 ETF 轮动研究系统。
 
-## Phase 1 Scope
+## 当前主策略
 
-- Project configuration and ETF universe.
-- Data-provider abstraction for iFinD MCP CLI, iFinD HTTP API, and deterministic synthetic data.
-- Parquet-first local storage.
-- Data quality checks for ETF daily bars.
-- CLI commands for collection and validation.
-- Phase records under `docs/`.
+当前主策略为 `m_1_3_6_top3_min0p6`：
 
-## Quick Start
+- 因子：1M/3M/6M 加权动量，并加入波动惩罚。
+- 选券：每周五调仓，选择得分最高的 3 只 ETF。
+- 门槛：最低得分 `0.60`。
+- 权重：单只 ETF 上限 `25%`，未使用资金留在现金。
+- 交易成本：单边 `5bps`。
+- 基准：`510300.SH` 沪深300ETF。
 
-Use a Python environment with `pandas`, `numpy`, and `pyarrow`.
+截至当前已接入的真实 iFinD ETF 数据，最新数据日期为 `2026-06-30`，最近一次组合调仓日为 `2026-06-26`：
+
+| 资产 | 名称 | 权重 |
+|---|---|---:|
+| `159995.SZ` | 芯片ETF | 25% |
+| `515000.SH` | 科技ETF | 25% |
+| `159915.SZ` | 创业板ETF | 25% |
+| `CASH` | 现金 | 25% |
+
+宏观风险 overlay 最新信号日期为 `2026-06-30`，宏观风险分数为 `0.2596`，目标仓位为 `100%`。因此当前 overlay 不触发降仓，组合仍保持上述 75% ETF 仓位与 25% 现金。
+
+## 快速开始
+
+需要 Python 环境安装 `pandas`、`numpy`、`pyarrow` 等依赖：
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -23,14 +36,14 @@ python -m etf_rotation.cli.backtest
 python -m unittest discover -s tests
 ```
 
-If using iFinD, copy `.env.example` to `.env` locally or export tokens in the shell. Never commit real tokens.
+如果使用 iFinD，请在本地复制 `.env.example` 为 `.env`，或在 shell 中导出 token。真实 token 不要提交到代码仓库。
 
 ```bash
 export IFIND_AUTH_TOKEN="..."
 export IFIND_REFRESH_TOKEN="..."
 ```
 
-Then collect real HTTP historical ETF bars:
+然后可以采集真实 HTTP 历史 ETF 行情：
 
 ```bash
 python -m etf_rotation.cli.collect --provider ifind-http
@@ -38,13 +51,13 @@ python -m etf_rotation.cli.validate
 python -m etf_rotation.cli.backtest
 ```
 
-Official recent ETF share-flow data can be extracted through MCP after `~/.config/ifind/mcp_config.json` is configured:
+配置好 `~/.config/ifind/mcp_config.json` 后，可以通过 MCP 提取官方 ETF 份额变化数据：
 
 ```bash
 python scripts/extract_mcp_share_data.py --start 2026-06-22 --end 2026-06-30
 ```
 
-Annual sample windows and factor-weight tuning:
+年度样本窗口、权重调参、候选策略验证与宏观 overlay 评估命令如下：
 
 ```bash
 python scripts/extract_mcp_share_data.py --windows 2022-06-22:2022-06-30,2023-06-21:2023-06-30,2024-06-21:2024-06-28,2025-06-23:2025-06-30,2026-06-22:2026-06-30 --output data/raw/etf_mcp_share_changes_annual_june.parquet --raw-dir data/raw/mcp_share_raw_annual_june
@@ -57,37 +70,35 @@ python scripts/evaluate_macro_factor.py
 python scripts/evaluate_macro_overlay.py
 ```
 
-## Decisions Already Applied
+## 已确认设定
 
-- Project directory: `/Users/sweethome/Qoder/etf-rotation`
-- Storage: Parquet files
-- Backtest data range: 2021-01-01 to 2026-06-30
-- ETF universe: default industry plus style pool from the prior plan
+- 项目目录：`/Users/sweethome/Qoder/etf-rotation`
+- 存储方式：本地 Parquet 文件
+- 回测区间：`2021-01-01` 至 `2026-06-30`
+- ETF 池：方案中的行业 ETF 与风格 ETF 池
+- 基准：`510300.SH` 沪深300ETF
 
-## Current Baseline
+## 当前研究结论
 
-The current Phase 2 baseline uses three factors available from ETF daily data:
+当前主候选 `m_1_3_6_top3_min0p6` 在真实 iFinD ETF 历史数据上的全样本结果：
 
-- Momentum: 1M/3M/6M returns minus volatility penalty.
-- Fund flow: 1M/3M changes in shares outstanding.
-- Crowding: inverse short-term turnover and amount heat.
+| 指标 | 数值 |
+|---|---:|
+| 总收益 | 94.08% |
+| 年化收益 | 14.80% |
+| 年化波动 | 19.44% |
+| Sharpe | 0.76 |
+| 最大回撤 | -17.02% |
+| 基准总收益 | -4.51% |
+| 超额总收益 | 98.59% |
+| 信息比率 | 1.14 |
+| 平均日换手 | 5.92% |
 
-The baseline backtest rebalances weekly into the top-scoring ETFs with equal weights subject to a single-position cap. See `docs/REAL_IFIND_BACKTEST_RECORD.md` for the current real iFinD run.
+宏观 EDB 数据和大部分行业指数日线已通过 iFinD MCP 接入。第一版“宏观共振横截面排序因子”因 IC 和回测贡献较弱，暂不纳入主策略。随后实现的“低频宏观风险/仓位 overlay”表现更稳，但全样本最大回撤改善不足，因此保留为可选防守分支，不替代主策略。
 
-## Current Research Candidate
+更多细节见：
 
-The current primary candidate is `m_1_3_6_top3_min0p6`:
-
-- 1M/3M/6M weighted momentum with volatility penalty.
-- Weekly Top 3 ETF rotation.
-- Minimum score threshold `0.60`.
-- Single ETF cap `25%`, leaving unused capital in cash when fewer names qualify.
-- Benchmark: `510300.SH` 沪深300ETF.
-- Weekly rebalance remains preferred over monthly in the current validation.
-- A 50m 20-day average amount filter is the first execution constraint to consider, but not yet the research baseline.
-
-See `docs/MOMENTUM_CANDIDATE_VALIDATION_RECORD.md` for rolling walk-forward and transaction-cost sensitivity results on real iFinD ETF history.
-
-## Extended Data Status
-
-Macro EDB data and most sector index daily series have been collected through iFinD MCP. The first transparent macro-resonance ranking factor was implemented and rejected because its IC and backtest contribution were weak. A low-frequency macro risk overlay was then implemented as an optional defensive branch; it preserves most returns but has not yet improved full-sample drawdown enough to replace the primary baseline. Sector valuation and consensus fields are not yet parsed because the current `sector_data` queries returned empty tables; see `docs/MACRO_SECTOR_DATA_RECORD.md`, `docs/MACRO_FACTOR_RECORD.md`, and `docs/MACRO_OVERLAY_RECORD.md` for details.
+- `docs/MOMENTUM_CANDIDATE_VALIDATION_RECORD.md`
+- `docs/MACRO_FACTOR_RECORD.md`
+- `docs/MACRO_OVERLAY_RECORD.md`
+- `docs/MACRO_SECTOR_DATA_RECORD.md`

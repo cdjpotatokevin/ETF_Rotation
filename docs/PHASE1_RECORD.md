@@ -1,22 +1,22 @@
-# Phase 1 Record: Data Infrastructure
+# 第一阶段记录：数据基础设施
 
-Date: 2026-06-30
+日期：2026-06-30
 
-## Scope
+## 范围
 
-This phase establishes the local project foundation for the ETF rotation system:
+本阶段为 ETF 轮动系统建立本地项目基础：
 
-- Project configuration in `config/project.json`
-- ETF universe in `config/etf_pool.json`
-- Python package under `src/etf_rotation`
-- Provider abstraction and deterministic synthetic provider
-- iFinD MCP CLI wrapper and HTTP API client shell
-- Parquet storage utility
-- ETF daily data validation
-- Collection and validation CLI commands
-- Unit tests
+- `config/project.json` 项目配置
+- `config/etf_pool.json` ETF 池
+- `src/etf_rotation` Python 包
+- 数据源抽象和可复现的合成数据源
+- iFinD MCP CLI 封装和 iFinD HTTP API 客户端框架
+- Parquet 存储工具
+- ETF 日线数据校验
+- 数据采集与校验 CLI 命令
+- 单元测试
 
-## Implemented Files
+## 已实现文件
 
 - `pyproject.toml`
 - `README.md`
@@ -36,9 +36,9 @@ This phase establishes the local project foundation for the ETF rotation system:
 - `src/etf_rotation/cli/validate.py`
 - `tests/`
 
-## Validation Results
+## 验证结果
 
-Commands run:
+运行命令：
 
 ```bash
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m pytest -q
@@ -46,22 +46,22 @@ Commands run:
 /Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m etf_rotation.cli.validate
 ```
 
-Results:
+结果：
 
-- Unit tests: 6 passed
-- Synthetic Parquet file: `data/raw/etf_daily.parquet`
-- Rows: 27,227
-- Symbols: 19
-- Date range: 2021-01-01 to 2026-06-30
-- Validation status: ok
-- Validation errors: none
-- Validation warnings: none
+- 单元测试：6 个通过
+- 合成数据 Parquet 文件：`data/raw/etf_daily.parquet`
+- 行数：27,227
+- 标的数量：19
+- 日期范围：`2021-01-01` 至 `2026-06-30`
+- 校验状态：通过
+- 校验错误：无
+- 校验警告：无
 
-Note: `pyarrow` prints sandbox CPU-probing warnings about `sysctlbyname` permissions in this Codex environment. Parquet write/read and validation completed successfully.
+说明：在 Codex 沙箱环境中，`pyarrow` 会打印 `sysctlbyname` 权限相关的 CPU 探测警告；Parquet 读写和数据校验均已正常完成。
 
-## Data Schema
+## 数据结构
 
-The normalized ETF daily table contains:
+标准化 ETF 日线表包含：
 
 - `date`
 - `symbol`
@@ -80,22 +80,22 @@ The normalized ETF daily table contains:
 - `shares_outstanding`
 - `source`
 
-## iFinD Integration Status
+## iFinD 接入状态
 
-The project now contains two integration points:
+项目目前包含两个 iFinD 接入点：
 
-- `IFindCliClient`: calls the authenticated iFinD MCP CLI from the `ifind-finance-data` skill.
-- `IFindHttpClient`: reads `IFIND_REFRESH_TOKEN` from the environment and calls iFinD HTTP API endpoints.
+- `IFindCliClient`：调用 `ifind-finance-data` 技能中的已认证 iFinD MCP CLI。
+- `IFindHttpClient`：从环境变量读取 `IFIND_REFRESH_TOKEN`，调用 iFinD HTTP API。
 
-Real batch ingestion is not yet enabled because we still need live sample responses for `cmd_history_quotation` to lock the exact JSON-to-table parser. Tokens must remain outside source code.
+真实批量采集在后续阶段已经启用，并通过 `cmd_history_quotation` 获取 ETF 历史行情。真实 token 始终保留在项目源码之外。
 
-## Next Step
+## 下一步
 
-Phase 2 should start with factor modules using the normalized daily Parquet table:
+第二阶段应基于标准化日线 Parquet 表开发因子模块：
 
-1. Momentum factor from 1M/3M/6M returns and trend stability.
-2. Fund-flow factor from `shares_outstanding` changes.
-3. Crowding factor from turnover and volume z-scores.
-4. Baseline weekly rebalance backtest.
+1. 使用 1M/3M/6M 收益率和趋势稳定性构建动量因子。
+2. 使用 `shares_outstanding` 变化构建资金流因子。
+3. 使用换手率和成交额 z-score 构建拥挤度因子。
+4. 建立每周调仓基线回测。
 
-Before benchmarking Phase 2, decide whether the primary benchmark should be 沪深300ETF, 沪深300ETF/中证500ETF blend, or another custom benchmark.
+基准已由用户确认使用 `510300.SH` 沪深300ETF。
