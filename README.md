@@ -101,6 +101,7 @@ python scripts/evaluate_macro_overlay.py
 更多细节见：
 
 - `docs/MOMENTUM_CANDIDATE_VALIDATION_RECORD.md`
+- `docs/ALLOCATION_VARIANT_RECORD.md`
 - `docs/MACRO_FACTOR_RECORD.md`
 - `docs/MACRO_OVERLAY_RECORD.md`
 - `docs/MACRO_SECTOR_DATA_RECORD.md`
