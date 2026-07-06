@@ -1,0 +1,33 @@
+{
+  "assets": [
+    {"symbol": "515000.SH", "name": "科技ETF", "bucket": "industry", "theme": "technology", "notes": "growth and high beta"},
+    {"symbol": "159995.SZ", "name": "芯片ETF", "bucket": "industry", "theme": "semiconductor", "notes": "growth and high beta"},
+    {"symbol": "159928.SZ", "name": "消费ETF", "bucket": "industry", "theme": "consumer", "notes": "defensive consumption"},
+    {"symbol": "515710.SH", "name": "食品ETF", "bucket": "industry", "theme": "food_beverage", "notes": "defensive consumption"},
+    {"symbol": "512010.SH", "name": "医药ETF", "bucket": "industry", "theme": "pharmaceutical", "notes": "defensive growth"},
+    {"symbol": "159828.SZ", "name": "医疗ETF", "bucket": "industry", "theme": "healthcare", "notes": "defensive growth"},
+    {"symbol": "510230.SH", "name": "金融ETF", "bucket": "industry", "theme": "financial", "notes": "cyclical financials"},
+    {"symbol": "512000.SH", "name": "券商ETF", "bucket": "industry", "theme": "brokerage", "notes": "high beta financials"},
+    {"symbol": "512400.SH", "name": "有色金属ETF", "bucket": "industry", "theme": "nonferrous_metals", "notes": "inflation beneficiary"},
+    {"symbol": "515220.SH", "name": "煤炭ETF", "bucket": "industry", "theme": "coal", "notes": "resource cyclical"},
+    {"symbol": "512660.SH", "name": "军工ETF", "bucket": "industry", "theme": "defense", "notes": "policy and counter-cycle"},
+    {"symbol": "159768.SZ", "name": "地产ETF", "bucket": "industry", "theme": "real_estate", "notes": "policy sensitive"},
+    {"symbol": "516950.SH", "name": "基建ETF", "bucket": "industry", "theme": "infrastructure", "notes": "policy sensitive"},
+    {"symbol": "512100.SH", "name": "中证1000ETF", "bucket": "style", "theme": "small_cap", "notes": "small cap growth"},
+    {"symbol": "159915.SZ", "name": "创业板ETF", "bucket": "style", "theme": "growth", "notes": "growth style"},
+    {"symbol": "510300.SH", "name": "沪深300ETF", "bucket": "style", "theme": "large_cap", "notes": "large cap core"},
+    {"symbol": "510500.SH", "name": "中证500ETF", "bucket": "style", "theme": "mid_cap", "notes": "mid cap core"},
+    {"symbol": "159949.SZ", "name": "创业板50ETF", "bucket": "style", "theme": "growth_leaders", "notes": "growth leaders"},
+    {"symbol": "512890.SH", "name": "红利低波ETF", "bucket": "style", "theme": "dividend_low_vol", "notes": "value and low volatility"},
+    {"symbol": "588000.SH", "name": "科创50ETF", "bucket": "style", "theme": "star_50", "notes": "STAR market growth"},
+    {"symbol": "512800.SH", "name": "银行ETF", "bucket": "industry", "theme": "bank", "notes": "dividend and rate sensitive"},
+    {"symbol": "512690.SH", "name": "酒ETF", "bucket": "industry", "theme": "liquor", "notes": "concentrated consumption"},
+    {"symbol": "515030.SH", "name": "新能源车ETF", "bucket": "industry", "theme": "new_energy_vehicle", "notes": "new energy vehicle chain"},
+    {"symbol": "515790.SH", "name": "光伏ETF", "bucket": "industry", "theme": "photovoltaic", "notes": "solar manufacturing chain"},
+    {"symbol": "159819.SZ", "name": "人工智能ETF", "bucket": "industry", "theme": "artificial_intelligence", "notes": "AI theme"},
+    {"symbol": "512980.SH", "name": "传媒ETF", "bucket": "industry", "theme": "media", "notes": "content and advertising cycle"},
+    {"symbol": "516020.SH", "name": "化工ETF", "bucket": "industry", "theme": "chemical", "notes": "midstream cyclical"},
+    {"symbol": "159611.SZ", "name": "电力ETF", "bucket": "industry", "theme": "power_utility", "notes": "utility and dividend defensive"},
+    {"symbol": "159865.SZ", "name": "养殖ETF", "bucket": "industry", "theme": "livestock", "notes": "agriculture and hog cycle"}
+  ]
+}
