@@ -47,15 +47,15 @@ def main() -> None:
     expanded_daily = merge_existing_and_new_daily(base_daily, new_daily)
     expanded_daily.to_parquet(out_dir / "expanded_a_share_etf_daily.parquet", index=False)
     unavailable = missing_symbols(expanded_assets, expanded_daily)
+    availability = {
+        "benchmark_symbol": cfg.benchmark_symbol,
+        "base_symbol_count": int(base_daily["symbol"].nunique()),
+        "expanded_symbol_count": int(expanded_daily["symbol"].nunique()),
+        "missing_symbols_without_data": unavailable,
+        "message": "扩展池历史行情数据已完整。" if not unavailable else "扩展池历史行情数据不完整，未运行扩展池回测。请配置 IFIND_REFRESH_TOKEN 或稍后重试 iFinD MCP。",
+    }
+    (out_dir / "data_availability.json").write_text(json.dumps(availability, ensure_ascii=False, indent=2), encoding="utf-8")
     if unavailable and not args.allow_incomplete:
-        availability = {
-            "benchmark_symbol": cfg.benchmark_symbol,
-            "base_symbol_count": int(base_daily["symbol"].nunique()),
-            "expanded_symbol_count": int(expanded_daily["symbol"].nunique()),
-            "missing_symbols_without_data": unavailable,
-            "message": "扩展池历史行情数据不完整，未运行扩展池回测。请配置 IFIND_REFRESH_TOKEN 或稍后重试 iFinD MCP。",
-        }
-        (out_dir / "data_availability.json").write_text(json.dumps(availability, ensure_ascii=False, indent=2), encoding="utf-8")
         raise SystemExit(json.dumps(availability, ensure_ascii=False, indent=2))
 
     summary = compare_pools(base_daily, expanded_daily, cfg.benchmark_symbol, out_dir)
