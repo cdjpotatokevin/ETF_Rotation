@@ -20,6 +20,7 @@
 新增扩展池评估脚本：
 
 - `scripts/evaluate_expanded_pool.py`
+- `scripts/evaluate_expanded_ml_regime_overlay.py`
 
 新增测试：
 
@@ -106,7 +107,58 @@
 
 - 当前主策略继续使用原 19 只 ETF 池。
 - 扩展 A 股 ETF 池作为增强候选版本继续跟踪。
-- 下一步需要把扩展池接入 ML regime overlay，检查扩池后的高弹性暴露能否通过仓位控制降低回撤。
+- 需要继续观察扩展池的风格集中度，尤其是科技、芯片、科创和 AI 暴露。
+
+## ML Regime Overlay
+
+已将扩展 A 股 ETF 池接入 ML regime overlay。
+
+测试逻辑：
+
+- 选券仍使用扩展池的动量 Top3。
+- ML 不直接选 ETF，只判断下期是否从 75% 仓位切换到 Top3 满仓。
+- 对比基准为扩展池固定 75% 仓位和扩展池固定 Top3 满仓。
+- 样本外区间从 2022 年开始，阈值测试 `0.50`、`0.55`、`0.60`、`0.65`。
+
+样本外汇总：
+
+| 方案 | 平均测试收益 | 平均 Sharpe | 最差回撤 | 满仓触发比例 |
+|---|---:|---:|---:|---:|
+| ML overlay，阈值0.55 | 17.63% | 1.12 | -19.81% | 14.88% |
+| 固定75%仓位 | 16.12% | 1.01 | -17.56% | 0% |
+| 固定Top3满仓 | 21.15% | 1.04 | -23.24% | 100% |
+
+不同阈值结果：
+
+| 阈值 | ML平均收益 | ML平均Sharpe | ML最差回撤 | 满仓触发比例 |
+|---:|---:|---:|---:|---:|
+| 0.55 | 17.63% | 1.12 | -19.81% | 14.88% |
+| 0.65 | 16.06% | 0.99 | -17.56% | 7.65% |
+| 0.60 | 16.06% | 1.00 | -18.31% | 11.47% |
+| 0.50 | 16.55% | 0.91 | -20.07% | 26.82% |
+
+最新 ML overlay 信号日期：`2026-07-03`。
+
+- 最优阈值：`0.55`
+- 预测满仓概率：`0.4357`
+- 判断：低于阈值，维持 75% 仓位
+
+最新扩展池 ML overlay 组合：
+
+| ETF代码 | 名称 | 权重 |
+|---|---|---:|
+| `159995.SZ` | 芯片ETF | 25% |
+| `588000.SH` | 科创50ETF | 25% |
+| `515000.SH` | 科技ETF | 25% |
+| `CASH` | 现金 | 25% |
+
+ML overlay 的效果比较微妙：
+
+- 相比固定满仓，ML overlay 把最差回撤从 `-23.24%` 降到 `-19.81%`，确实压住了满仓风险。
+- 相比固定 75% 仓位，ML overlay 的平均收益从 `16.12%` 提高到 `17.63%`，平均 Sharpe 从 `1.01` 提高到 `1.12`。
+- 但 ML overlay 的最差回撤 `-19.81%` 仍高于固定 75% 仓位的 `-17.56%`，说明它不是纯防守增强，而是“有限进攻 + 可控回撤”的折中。
+
+因此，扩展池 ML overlay 可以作为增强候选，但仍不建议直接替代当前主策略。若后续要提升为主策略，需要加入更强的回撤约束，例如市场宽度、宏观风险、行业集中度或科技拥挤度特征。
 
 ## 运行方式
 
@@ -129,6 +181,20 @@ export IFIND_REFRESH_TOKEN="..."
 - `data/processed/expanded_a_share_pool/latest_pool_comparison_weights.csv`
 - `data/processed/expanded_a_share_pool/summary.json`
 
+运行扩展池 ML overlay：
+
+```bash
+/Users/sweethome/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 scripts/evaluate_expanded_ml_regime_overlay.py
+```
+
+输出文件：
+
+- `data/processed/expanded_a_share_ml_regime_overlay/expanded_ml_regime_summary.csv`
+- `data/processed/expanded_a_share_ml_regime_overlay/expanded_ml_regime_walk_forward.csv`
+- `data/processed/expanded_a_share_ml_regime_overlay/latest_expanded_ml_regime_weights.parquet`
+- `data/processed/expanded_a_share_ml_regime_overlay/latest_expanded_ml_regime_probability.parquet`
+- `data/processed/expanded_a_share_ml_regime_overlay/summary.json`
+
 ## 风控处理
 
 脚本默认要求扩展池 29 只 ETF 都有历史行情。如果新增 ETF 数据缺失，会中止并输出缺失代码，不运行回测。
@@ -137,4 +203,4 @@ export IFIND_REFRESH_TOKEN="..."
 
 ## 下一步
 
-将扩展池接入 ML regime overlay，并和固定 75% 仓位、Top3 满仓继续并排观察。
+继续为扩展池 ML overlay 增加市场宽度、宏观风险、行业集中度和科技拥挤度特征，验证能否在保留收益提升的同时把最差回撤压回固定 75% 仓位附近。
