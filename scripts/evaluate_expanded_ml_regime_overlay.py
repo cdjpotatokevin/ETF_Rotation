@@ -24,7 +24,7 @@ from etf_rotation.ml_overlay import (
 )
 from etf_rotation.storage import ParquetStore
 from scripts.evaluate_expanded_pool import merge_existing_and_new_daily
-from scripts.evaluate_ml_regime_overlay import aggregate_thresholds, filter_dates, prefix_metrics
+from scripts.evaluate_ml_regime_overlay import aggregate_thresholds, filter_dates, latest_decision_date, prefix_metrics
 from scripts.validate_momentum_candidate import DEFAULT_SPLITS, compute_candidate_scores
 
 
@@ -123,7 +123,7 @@ def evaluate_ml_overlay_for_pool(
 
 
 def latest_signal(daily: pd.DataFrame, scores: pd.DataFrame, decision_frame: pd.DataFrame, benchmark_symbol: str, threshold: float) -> dict:
-    latest_date = pd.to_datetime(daily["date"]).max()
+    latest_date = latest_decision_date(daily, decision_frame)
     train = decision_frame[(decision_frame["date"] < latest_date) & decision_frame["target_full"].notna()].copy()
     test = decision_frame[decision_frame["date"] == latest_date].copy()
     model = fit_regime_model(train)

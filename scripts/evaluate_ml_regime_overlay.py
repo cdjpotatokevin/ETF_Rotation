@@ -98,7 +98,7 @@ def main() -> None:
 
 
 def latest_signal(daily: pd.DataFrame, scores: pd.DataFrame, decision_frame: pd.DataFrame, benchmark_symbol: str, threshold: float) -> dict:
-    latest_date = pd.to_datetime(daily["date"]).max()
+    latest_date = latest_decision_date(daily, decision_frame)
     train = decision_frame[(decision_frame["date"] < latest_date) & decision_frame["target_full"].notna()].copy()
     test = decision_frame[decision_frame["date"] == latest_date].copy()
     model = fit_regime_model(train)
@@ -110,6 +110,16 @@ def latest_signal(daily: pd.DataFrame, scores: pd.DataFrame, decision_frame: pd.
         "probabilities": probabilities,
         "weights": weights[weights["date"] == weights["date"].max()].copy(),
     }
+
+
+def latest_decision_date(daily: pd.DataFrame, decision_frame: pd.DataFrame) -> pd.Timestamp:
+    latest_data_date = pd.to_datetime(daily["date"]).max()
+    decisions = decision_frame.copy()
+    decisions["date"] = pd.to_datetime(decisions["date"])
+    available = decisions[decisions["date"] <= latest_data_date]
+    if available.empty:
+        raise ValueError("no regime decision date is available on or before latest data date")
+    return pd.to_datetime(available["date"]).max()
 
 
 def aggregate_thresholds(walk: pd.DataFrame) -> pd.DataFrame:

@@ -10,6 +10,7 @@ from etf_rotation.ml_overlay import (
     selected_basket_return,
 )
 from scripts.evaluate_ml_regime_overlay import aggregate_thresholds
+from scripts.evaluate_ml_regime_overlay import latest_signal as base_latest_signal
 from scripts.validate_momentum_candidate import compute_candidate_scores
 
 
@@ -73,3 +74,16 @@ def test_aggregate_thresholds_includes_baseline_comparison_columns():
     )
     result = aggregate_thresholds(walk)
     assert {"avg_defensive_sharpe", "avg_full_sharpe", "worst_full_drawdown"} <= set(result.columns)
+
+
+def test_latest_signal_uses_last_rebalance_date_when_latest_data_is_not_rebalance_day():
+    cfg = load_project_config()
+    assets = load_etf_pool()[:6]
+    daily = SyntheticMarketDataProvider().fetch_etf_daily(assets, cfg.data_start, cfg.data_end)
+    scores = compute_candidate_scores(daily, "m_1_3")
+    decisions = build_regime_decision_frame(daily, scores, assets[0].symbol)
+
+    result = base_latest_signal(daily, scores, decisions, assets[0].symbol, 0.50)
+
+    assert not result["probabilities"].empty
+    assert result["probabilities"]["date"].max() <= pd.to_datetime(daily["date"]).max()

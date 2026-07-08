@@ -1,7 +1,7 @@
 {
   "project_name": "ETF Rotation",
   "data_start": "2021-01-01",
-  "data_end": "2026-07-03",
+  "data_end": "2026-07-08",
   "rebalance_frequency": "W-FRI",
   "benchmark_symbol": "510300.SH",
   "storage": {
