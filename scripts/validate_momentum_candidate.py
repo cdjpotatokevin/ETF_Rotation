@@ -11,6 +11,7 @@ import pandas as pd
 
 from etf_rotation.backtest.engine import BacktestConfig, run_weekly_rotation_backtest
 from etf_rotation.config import load_project_config, resolve_project_path
+from etf_rotation.data.window import filter_daily_window
 from etf_rotation.factors.momentum_variants import MOMENTUM_SPECS, compute_momentum_variant
 from etf_rotation.storage import ParquetStore
 
@@ -51,7 +52,7 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = load_project_config()
-    daily = ParquetStore(cfg.raw_dir).read("etf_daily")
+    daily = filter_daily_window(ParquetStore(cfg.raw_dir).read("etf_daily"), cfg.data_start, cfg.data_end)
     candidate = CandidateConfig(
         spec=args.spec,
         top_n=args.top_n,

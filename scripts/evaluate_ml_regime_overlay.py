@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from etf_rotation.config import load_project_config, resolve_project_path
+from etf_rotation.data.window import filter_daily_window
 from etf_rotation.ml_overlay import (
     MLRegimeOverlayConfig,
     build_regime_decision_frame,
@@ -32,7 +33,7 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = load_project_config()
-    daily = ParquetStore(cfg.raw_dir).read("etf_daily")
+    daily = filter_daily_window(ParquetStore(cfg.raw_dir).read("etf_daily"), cfg.data_start, cfg.data_end)
     daily["date"] = pd.to_datetime(daily["date"])
     scores = compute_candidate_scores(daily, "m_1_3_6")
     decision_frame = build_regime_decision_frame(daily, scores, cfg.benchmark_symbol)

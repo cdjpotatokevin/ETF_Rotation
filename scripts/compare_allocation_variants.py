@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from etf_rotation.config import load_etf_pool, load_project_config, resolve_project_path
+from etf_rotation.data.window import filter_daily_window
 from etf_rotation.storage import ParquetStore
 from scripts.validate_momentum_candidate import (
     CandidateConfig,
@@ -65,7 +66,7 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = load_project_config()
-    daily = ParquetStore(cfg.raw_dir).read("etf_daily")
+    daily = filter_daily_window(ParquetStore(cfg.raw_dir).read("etf_daily"), cfg.data_start, cfg.data_end)
     scores = compute_candidate_scores(daily, "m_1_3_6")
     out_dir = resolve_project_path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

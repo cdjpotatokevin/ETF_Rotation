@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
 
 from etf_rotation.config import load_etf_pool, load_project_config, resolve_project_path
 from etf_rotation.data.ifind_http import IFindHttpMarketDataProvider
+from etf_rotation.data.window import filter_daily_window
 from etf_rotation.storage import ParquetStore
 from scripts.compare_allocation_variants import DEFAULT_VARIANTS, latest_equity_exposure, to_candidate_config, variant_metadata
 from scripts.validate_momentum_candidate import DEFAULT_SPLITS, compute_candidate_scores, prefix_metrics, run_candidate, run_walk_forward
@@ -33,7 +34,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     raw_store = ParquetStore(cfg.raw_dir)
 
-    base_daily = raw_store.read("etf_daily")
+    base_daily = filter_daily_window(raw_store.read("etf_daily"), cfg.data_start, cfg.data_end)
     expanded_assets = load_etf_pool(resolve_project_path(args.expanded_pool))
     base_symbols = set(base_daily["symbol"].unique())
     missing_assets = [asset for asset in expanded_assets if asset.symbol not in base_symbols]
@@ -44,6 +45,8 @@ def main() -> None:
         raw_store.write(new_data_name, fetched)
 
     new_daily = raw_store.read(new_data_name) if raw_store.exists(new_data_name) else pd.DataFrame(columns=base_daily.columns)
+    if not new_daily.empty:
+        new_daily = filter_daily_window(new_daily, cfg.data_start, cfg.data_end)
     expanded_daily = merge_existing_and_new_daily(base_daily, new_daily)
     expanded_daily.to_parquet(out_dir / "expanded_a_share_etf_daily.parquet", index=False)
     unavailable = missing_symbols(expanded_assets, expanded_daily)

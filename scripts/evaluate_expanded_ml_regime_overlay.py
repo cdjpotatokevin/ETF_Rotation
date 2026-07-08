@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from etf_rotation.config import load_project_config, resolve_project_path
+from etf_rotation.data.window import filter_daily_window
 from etf_rotation.ml_overlay import (
     MLRegimeOverlayConfig,
     build_ml_regime_weights,
@@ -37,8 +38,8 @@ def main() -> None:
 
     cfg = load_project_config()
     raw_store = ParquetStore(cfg.raw_dir)
-    base_daily = raw_store.read("etf_daily")
-    new_daily = raw_store.read(args.new_data_name)
+    base_daily = filter_daily_window(raw_store.read("etf_daily"), cfg.data_start, cfg.data_end)
+    new_daily = filter_daily_window(raw_store.read(args.new_data_name), cfg.data_start, cfg.data_end)
     daily = merge_existing_and_new_daily(base_daily, new_daily)
     thresholds = [float(item) for item in args.thresholds.split(",") if item.strip()]
     out_dir = resolve_project_path(args.output_dir)
